@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import com.puyixiaowo.rsnake.constants.Constants;
-import com.puyixiaowo.rsnake.enums.DirectionEnum;
 
 /**
  * @author weishaoqiang
@@ -29,9 +28,9 @@ public class Snake {
 	private JPanel panel;// 蛇所在画布
 	private Timer timer;
 	private int direction = -1;
-	private Block turner;// 转角
 	private int gamerDirection = -1;
-
+	private Block latestBlock = null;
+	
 	/**
 	 * 
 	 */
@@ -108,14 +107,6 @@ public class Snake {
 		return direction;
 	}
 
-	public Block getTurner() {
-		return turner;
-	}
-
-	public void setTurner(Block turner) {
-		this.turner = turner;
-	}
-
 	public int getGamerDirection() {
 		return gamerDirection;
 	}
@@ -145,7 +136,6 @@ public class Snake {
 			this.nextBodyBlock();
 		}
 		direction = getSnakeRandomDirection();// 获取蛇初始运动方向
-		body.get(0).setDirection(direction);//设置蛇头运动方向
 		System.out.println("snake born direction:" + direction);
 		System.out.println("snake born,position:");
 		for (int i = 0; i < body.size(); i++) {
@@ -167,21 +157,7 @@ public class Snake {
 			// 获取键盘方向
 			this.direction = this.gamerDirection;
 		}
-		// 设置turner
-		turner = this.getSnakeTuner();
 		return direction;
-	}
-	/**
-	 * 获取蛇身转角
-	 * @return
-	 */
-	private Block getSnakeTuner() {
-		//蛇身曲折
-		
-		
-		new Block(this.body.get(0).getX(), this.body.get(0).getY(),
-				this.panel);
-		return null;
 	}
 
 	/**
@@ -195,6 +171,11 @@ public class Snake {
 		// 不可以倒退
 		if ((direction + this.direction) == 1
 				|| (direction + this.direction == 5)) {
+			getRandomDirection();
+		}
+		//不可以是身体方向
+		Block head = this.body.get(0);
+		if (!head.moveDirection(this, direction, false)) {
 			getRandomDirection();
 		}
 		return direction;
@@ -224,7 +205,7 @@ public class Snake {
 	 * @return
 	 */
 	private Block getNextNotBodyInBoundsBlock(Block lastBlock) {
-		Block block = lastBlock.nextBlock();
+		Block block = lastBlock.nextRandomBlock(this);
 		if (isBody(block) || !isInBurnBounds(block)) {
 			getNextNotBodyInBoundsBlock(lastBlock);
 		}
@@ -251,13 +232,13 @@ public class Snake {
 		ActionListener taskPerformer = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				// 移动一步
+				moveOneStep();
 				System.out.print(snake.getBody().get(0).getX() + "-"
 						+ snake.getBody().get(0).getY() + ",");
 				System.out.print(snake.getBody().get(1).getX() + "-"
-						+ snake.getBody().get(0).getY() + ",");
+						+ snake.getBody().get(1).getY() + ",");
 				System.out.println(snake.getBody().get(2).getX() + "-"
-						+ snake.getBody().get(0).getY() + ",");
-				moveOneStep();
+						+ snake.getBody().get(2).getY());
 			}
 		};
 		timer = new Timer(delay, taskPerformer);
@@ -271,56 +252,33 @@ public class Snake {
 	 */
 	private void moveOneStep() {
 		// 判断蛇是否死亡
-		Block head = this.getBody().get(0);
-		Block headTemp = new Block(head.getX(), head.getY(), null);
-		int direct = this.direction;
-
-		if (!headTemp.moveDirection(this, direction, false)) {
+		if (isDead(this)) {
 			dead();
 			return;
 		}
-		List<Block> bodyTemp = new ArrayList<Block>();
+		
 		//
 		for (int i = 0; i < this.body.size(); i++) {
 			Block b = this.body.get(i);
-			System.out.println("before:" + b.getX() + "-" + b.getY());
-			if (!b.equals(turner)) {
-				direct = this.getTurnDirection();
+			Block temp = new Block(b.getX(), b.getY(), this.panel);
+			if ((i - 1) < 0) {
+				b.moveDirection(this, this.direction, true);
+			} else {
+				b.moveTo(b, latestBlock);
 			}
-			b.moveDirection(this, direct, true);
-			System.out.println("after:" + b.getX() + "-" + b.getY());
-			bodyTemp.add(b);
+			latestBlock = temp;
+			this.body.set(i, b);
 		}
-		this.body = bodyTemp;
 	}
-
 	/**
-	 * 获取蛇尾距转角的运动方向
-	 * 
+	 * 判断蛇是否死亡
+	 * @param snake
 	 * @return
 	 */
-	private int getTurnDirection() {
-		int direction = 0;
-		Block end = this.body.get(this.body.size() - 1);
-		if (end.getX() - turner.getX() < 0) {
-			// 向右
-			direction = DirectionEnum.RIGHT.code;
-		}
-		if (end.getX() - turner.getX() > 0) {
-			// 向左
-			direction = DirectionEnum.LEFT.code;
-		}
-		if (end.getY() - turner.getY() < 0) {
-			// 向下
-			direction = DirectionEnum.DOWN.code;
-		}
-		if (end.getY() - turner.getY() > 0) {
-			// 向上
-			direction = DirectionEnum.UP.code;
-		}
-		return direction;
+	public boolean isDead(Snake snake){
+		return !this.body.get(0).moveDirection(snake, direction, false);
 	}
-
+	
 	/**
 	 * 
 	 */
@@ -409,9 +367,5 @@ public class Snake {
 		}
 
 		return new Block(randomX, randomY, this.panel);
-	}
-
-	public static void main(String[] args) {
-
 	}
 }

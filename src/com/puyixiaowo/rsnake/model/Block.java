@@ -20,19 +20,10 @@ import com.puyixiaowo.rsnake.constants.Constants;
 public class Block {
 	private int x;
 	private int y;
-	private int direction = -1;//每一个方块都具备方向属性，默认无方向
 	private JPanel panel;
 
 	public int getX() {
 		return x;
-	}
-
-	public int getDirection() {
-		return direction;
-	}
-
-	public void setDirection(int direction) {
-		this.direction = direction;
 	}
 
 	/**
@@ -72,7 +63,7 @@ public class Block {
 	 * 
 	 * @return
 	 */
-	public Block nextBlock() {
+	public Block nextRandomBlock(Snake snake) {
 		int x = this.getX();
 		int y = this.getY();
 		int size = Constants.BLOCK_SIZE;
@@ -101,10 +92,13 @@ public class Block {
 			y -= size;
 			break;
 		}
-
-		return new Block(x, y, this.getPanel());
+		Block block = new Block(x, y, this.getPanel());
+		if (snake.isBody(block)) {
+			nextRandomBlock(snake);
+		}
+		return block;
 	}
-
+	
 	/**
 	 * 获取朝某放向移动一个格子
 	 * 
@@ -116,7 +110,6 @@ public class Block {
 		int y = this.getY();
 		int size = Constants.BLOCK_SIZE;
 		Block point = new Block(x, y, this.panel);
-
 		switch (direction) {
 		case 0:
 			y -= size;
@@ -133,15 +126,12 @@ public class Block {
 		default:
 			break;
 		}
-
-		this.setX(x);
-		this.setY(y);
-		if (snake.isBody(point) || !snake.isInBounds(point)) {
+		Block to = new Block(x, y, this.panel);
+		if (snake.isBody(to) || !snake.isInBounds(to)) {
 			return false;
 		}
 		if (isMove){
-			setPosition(point, new Block(x, y, this.panel));
-			;
+			moveTo(point, to);
 		}
 		return true;
 	}
@@ -163,20 +153,14 @@ public class Block {
 	}
 
 	/**
-	 * 设置方块位置
+	 * 方块移动
 	 * 
 	 * @param from
 	 * @param to
 	 */
-	public void setPosition(Block from, Block to) {
+	public void moveTo(Block from, Block to) {
 		JLabel label = (JLabel) panel.getComponentAt(from.getX(), from.getY());
 		label.setLocation(to.getX(), to.getY());
-	}
-
-	public static void main(String[] args) {
-		Block block = new Block(40, 40, null);
-		Block next = block.nextBlock();
-		System.out.println(next.getX() + "-" + next.getY());
 	}
 
 }
