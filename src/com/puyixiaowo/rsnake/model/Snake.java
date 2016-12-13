@@ -30,7 +30,7 @@ public class Snake {
 	private int direction = -1;
 	private int gamerDirection = -1;
 	private Block latestBlock = null;
-	
+
 	/**
 	 * 
 	 */
@@ -173,7 +173,7 @@ public class Snake {
 				|| (direction + this.direction == 5)) {
 			getRandomDirection();
 		}
-		//不可以是身体方向
+		// 不可以是身体方向
 		Block head = this.body.get(0);
 		if (!head.moveDirection(this, direction, false)) {
 			getRandomDirection();
@@ -226,22 +226,14 @@ public class Snake {
 	 * @param direction
 	 */
 	private void moveForward() {
-		Snake snake = this;
-		int delay = Constants.SNAKE_MOVE_INTERVAL_DEFAULT; // milliseconds
 
 		ActionListener taskPerformer = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				// 移动一步
 				moveOneStep();
-				System.out.print(snake.getBody().get(0).getX() + "-"
-						+ snake.getBody().get(0).getY() + ",");
-				System.out.print(snake.getBody().get(1).getX() + "-"
-						+ snake.getBody().get(1).getY() + ",");
-				System.out.println(snake.getBody().get(2).getX() + "-"
-						+ snake.getBody().get(2).getY());
 			}
 		};
-		timer = new Timer(delay, taskPerformer);
+		timer = new Timer(Constants.SNAKE_MOVE_INTERVAL_DEFAULT, taskPerformer);
 		timer.start();
 		while (true)
 			;
@@ -256,7 +248,7 @@ public class Snake {
 			dead();
 			return;
 		}
-		
+
 		//
 		for (int i = 0; i < this.body.size(); i++) {
 			Block b = this.body.get(i);
@@ -269,16 +261,25 @@ public class Snake {
 			latestBlock = temp;
 			this.body.set(i, b);
 		}
+
+		System.out.print(this.getBody().get(0).getX() + "-"
+				+ this.getBody().get(0).getY() + ",");
+		System.out.print(this.getBody().get(1).getX() + "-"
+				+ this.getBody().get(1).getY() + ",");
+		System.out.println(this.getBody().get(2).getX() + "-"
+				+ this.getBody().get(2).getY());
 	}
+
 	/**
 	 * 判断蛇是否死亡
+	 * 
 	 * @param snake
 	 * @return
 	 */
-	public boolean isDead(Snake snake){
+	public boolean isDead(Snake snake) {
 		return !this.body.get(0).moveDirection(snake, direction, false);
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -340,32 +341,20 @@ public class Snake {
 	private Block getRandomPos(boolean bounds, boolean apple) {
 		Random random = new Random();
 
-		int randomX = random.nextInt(maxX);
-		int randomY = random.nextInt(maxY);
-
-		if (!bounds) {
-			return new Block(randomX, randomY, this.panel);
-		}
-
-		if (apple) {
-			Block block = new Block(randomX, randomY, this.panel);
-			// 不可是蛇本身
-			for (Block b : body) {
-				if (block.equals(b)) {
-
-				}
-
-			}
-		}
+		int randomX = 0;
+		int randomY = 0;
 
 		// 获取边界内的随机位置
-		while (!(randomX > Constants.BOUNDS_BLOCK_NUM
-				&& randomX < (maxX - Constants.BOUNDS_BLOCK_NUM)
-				&& randomY > Constants.BOUNDS_BLOCK_NUM && randomY < (maxY - Constants.BOUNDS_BLOCK_NUM))) {
+		while (bounds
+				&& !isInBurnBounds(new Block(randomX, randomY, this.panel))) {
 			randomX = random.nextInt(maxX);
 			randomY = random.nextInt(maxY);
 		}
-
+		while (apple
+				&& isBody(new Block(randomX, randomY, this.panel))) {
+			randomX = random.nextInt(maxX);
+			randomY = random.nextInt(maxY);
+		}
 		return new Block(randomX, randomY, this.panel);
 	}
 }
