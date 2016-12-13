@@ -11,6 +11,7 @@ import javax.swing.JPanel;
  */
 public class Constants {
 	
+	public static final int SNAKE_LENGTH = 3;
 	/**
 	 * 默认蛇移动时间间隔
 	 */
@@ -28,4 +29,8 @@ public class Constants {
 	 * 游戏画布
 	 */
 	public static JPanel panel;
+	/**
+	 * 方块大小
+	 */
+	public static int BLOCK_SIZE;
 }

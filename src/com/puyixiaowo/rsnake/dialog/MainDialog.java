@@ -14,12 +14,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
-import com.puyixiaowo.rsnake.model.Block;
 import com.puyixiaowo.rsnake.model.Screen;
 import com.puyixiaowo.rsnake.model.Snake;
 
@@ -54,7 +52,7 @@ public class MainDialog extends JFrame {
 
 		int x = (screen.getWidth() - width) / 2;
 		int y = (screen.getHeight() - height) / 2;
-		
+
 		frame.setSize(width, height);
 		frame.setBounds(x, y, width, height);
 	}
@@ -82,50 +80,49 @@ public class MainDialog extends JFrame {
 			}
 
 		});
-		
-		Container contentPane=frame.getContentPane();
+
+		Container contentPane = frame.getContentPane();
 		frame.setVisible(true);
 		// 注意只有窗口显示后getLocationOnScreen才可以调用，否则出错
-		//Point contentPos = contentPane.getLocationOnScreen();// 在屏幕的坐标
+		// Point contentPos = contentPane.getLocationOnScreen();// 在屏幕的坐标
 		Dimension size = contentPane.getSize(); // 可视区域的大小
-		
+
 		panelMain.setSize(size);
 		panelMain.setBackground(new Color(255, 255, 255));
 		panelMain.setLayout(new GridBagLayout());
 		int widthPanel = panelMain.getHeight() - 40;
-		
+
 		panel.setSize(widthPanel, widthPanel);
 		GridBagConstraints gridBagConstraints = new GridBagConstraints();
-		gridBagConstraints.gridx=0;  
-        gridBagConstraints.gridy=0;  
-        gridBagConstraints.gridwidth=1;  
-        gridBagConstraints.gridheight=1;  
-        gridBagConstraints.weightx=0;  
-        gridBagConstraints.weighty=0;  
-        gridBagConstraints.anchor=GridBagConstraints.NORTHWEST;  
-        gridBagConstraints.fill=GridBagConstraints.NONE;  
-        gridBagConstraints.insets=new Insets(0,0,0,0);  
-        gridBagConstraints.ipadx=widthPanel;  
-        gridBagConstraints.ipady=widthPanel;
-        
-        
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0;
+		gridBagConstraints.weighty = 0;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.insets = new Insets(0, 0, 0, 0);
+		gridBagConstraints.ipadx = widthPanel;
+		gridBagConstraints.ipady = widthPanel;
+
 		panel.setBackground(ColorEnum.COLOR_BG.toColor());
 		panel.setLayout(null);
 		panelMain.add(panel, gridBagConstraints);
-		
+
 		frame.add(panelMain);
 		
-		/////
+		Constants.BLOCK_SIZE = panel.getWidth() / Constants.BLOCK_NUM;//设置方块大小
+		// ///
 		Snake snake = new Snake(panel);
-        snake.move();
+		snake.move();
 	}
-	
 
 	public static void main(String[] args) {
 		try {
 			org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();
 		} catch (Exception e) {
-			
+
 		}
 
 		MainDialog mainDialog = new MainDialog();

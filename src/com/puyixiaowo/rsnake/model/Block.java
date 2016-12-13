@@ -20,21 +20,19 @@ import com.puyixiaowo.rsnake.constants.Constants;
 public class Block {
 	private int x;
 	private int y;
+	private int direction = -1;//每一个方块都具备方向属性，默认无方向
 	private JPanel panel;
-	private final int size = panel.getWidth() / Constants.BLOCK_NUM;
 
 	public int getX() {
 		return x;
 	}
 
-	/**
-	 * @param x
-	 * @param y
-	 */
-	public Block(int x, int y) {
-		super();
-		this.x = x;
-		this.y = y;
+	public int getDirection() {
+		return direction;
+	}
+
+	public void setDirection(int direction) {
+		this.direction = direction;
 	}
 
 	/**
@@ -77,10 +75,10 @@ public class Block {
 	public Block nextBlock() {
 		int x = this.getX();
 		int y = this.getY();
+		int size = Constants.BLOCK_SIZE;
 
 		Random random = new Random();
-		int direction = random.nextInt(4);
-
+		int direction = random.nextInt(4);//四个方向
 		switch (direction) {
 		case 0:
 			// 向上
@@ -113,10 +111,11 @@ public class Block {
 	 * @param direction
 	 * @return
 	 */
-	public void moveDirection(int direction) {
+	public boolean moveDirection(Snake snake, int direction, boolean isMove) {
 		int x = this.getX();
 		int y = this.getY();
-		Block point = new Block(x, y);
+		int size = Constants.BLOCK_SIZE;
+		Block point = new Block(x, y, this.panel);
 
 		switch (direction) {
 		case 0:
@@ -137,8 +136,14 @@ public class Block {
 
 		this.setX(x);
 		this.setY(y);
-		setPosition(point, new Block(x, y));
-		;
+		if (snake.isBody(point) || !snake.isInBounds(point)) {
+			return false;
+		}
+		if (isMove){
+			setPosition(point, new Block(x, y, this.panel));
+			;
+		}
+		return true;
 	}
 
 	/**
@@ -169,7 +174,9 @@ public class Block {
 	}
 
 	public static void main(String[] args) {
-
+		Block block = new Block(40, 40, null);
+		Block next = block.nextBlock();
+		System.out.println(next.getX() + "-" + next.getY());
 	}
 
 }

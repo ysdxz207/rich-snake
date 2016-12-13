@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.enums.DirectionEnum;
 
 /**
  * @author weishaoqiang
@@ -23,10 +24,13 @@ public class Snake {
 	private List<Block> body;
 	private int maxX;
 	private int maxY;
-	
-	///
-	private JPanel panel;//蛇所在画布
+
+	// /
+	private JPanel panel;// 蛇所在画布
 	private Timer timer;
+	private int direction = -1;
+	private Block turner;// 转角
+	private int gamerDirection = -1;
 
 	/**
 	 * 
@@ -36,7 +40,7 @@ public class Snake {
 		this.born();
 		this.draw();
 	}
-	
+
 	/**
 	 * @param panel
 	 */
@@ -52,7 +56,7 @@ public class Snake {
 	 */
 	private void draw() {
 		for (Block block : this.getBody()) {
-        	block.draw();
+			block.draw();
 		}
 	}
 
@@ -63,7 +67,7 @@ public class Snake {
 	public void setBody(List<Block> body) {
 		this.body = body;
 	}
-	
+
 	public int getMaxX() {
 		return maxX;
 	}
@@ -95,7 +99,32 @@ public class Snake {
 	public void setTimer(Timer timer) {
 		this.timer = timer;
 	}
-	////////////////////////////////////////
+
+	public void setDirection(int direction) {
+		this.direction = direction;
+	}
+
+	public int getDirection() {
+		return direction;
+	}
+
+	public Block getTurner() {
+		return turner;
+	}
+
+	public void setTurner(Block turner) {
+		this.turner = turner;
+	}
+
+	public int getGamerDirection() {
+		return gamerDirection;
+	}
+
+	public void setGamerDirection(int gamerDirection) {
+		this.gamerDirection = gamerDirection;
+	}
+
+	// //////////////////////////////////////
 
 	/**
 	 * 初始化游戏世界
@@ -112,33 +141,101 @@ public class Snake {
 	 */
 	private void born() {
 		body = new ArrayList<Block>();
-		Block head = getRandomPos(true, false);
+		for (int i = 0; i < Constants.SNAKE_LENGTH; i++) {
+			this.nextBodyBlock();
+		}
+		direction = getSnakeRandomDirection();// 获取蛇初始运动方向
+		body.get(0).setDirection(direction);//设置蛇头运动方向
+		System.out.println("snake born direction:" + direction);
+		System.out.println("snake born,position:");
+		for (int i = 0; i < body.size(); i++) {
+			Block block = body.get(i);
+			System.out.println("block[" + i + "]x=" + block.getX() + ",y="
+					+ block.getY());
+		}
+	}
 
-		Block body1 = head.nextBlock();
-		Block body2 = body1.nextBlock();
-		Block body3 = body2.nextBlock();
+	/**
+	 * 获取蛇初始运动方向
+	 * 
+	 * @return
+	 */
+	private int getSnakeRandomDirection() {
+		if (this.direction < 0) {
+			this.direction = getRandomDirection();
+		} else {
+			// 获取键盘方向
+			this.direction = this.gamerDirection;
+		}
+		// 设置turner
+		turner = this.getSnakeTuner();
+		return direction;
+	}
+	/**
+	 * 获取蛇身转角
+	 * @return
+	 */
+	private Block getSnakeTuner() {
+		//蛇身曲折
+		
+		
+		new Block(this.body.get(0).getX(), this.body.get(0).getY(),
+				this.panel);
+		return null;
+	}
 
-		body.add(head);
-		body.add(body1);
-		body.add(body2);
-		body.add(body3);
+	/**
+	 * 获取随机方向
+	 * 
+	 * @return
+	 */
+	private int getRandomDirection() {
+		Random random = new Random();
+		int direction = random.nextInt(4);
+		// 不可以倒退
+		if ((direction + this.direction) == 1
+				|| (direction + this.direction == 5)) {
+			getRandomDirection();
+		}
+		return direction;
+	}
 
+	/**
+	 * 获取蛇身下一个方块
+	 * 
+	 * @return
+	 */
+	private void nextBodyBlock() {
+		if (this.body.size() == 0) {
+			Block head = getRandomPos(true, false);
+			this.body.add(head);
+		} else {
+			Block lastBlock = this.body.get(this.body.size() - 1);
+			Block block = getNextNotBodyInBoundsBlock(lastBlock);
+			this.body.add(block);
+		}
+
+	}
+
+	/**
+	 * 获取非身体，且在游戏出生边界内的方块
+	 * 
+	 * @param lastBlock
+	 * @return
+	 */
+	private Block getNextNotBodyInBoundsBlock(Block lastBlock) {
+		Block block = lastBlock.nextBlock();
+		if (isBody(block) || !isInBurnBounds(block)) {
+			getNextNotBodyInBoundsBlock(lastBlock);
+		}
+		return block;
 	}
 
 	/**
 	 * 蛇移动
 	 */
 	public void move() {
-		moveForward(this);
-	}
-
-	/**
-	 * @return
-	 */
-	private int getDirection() {
-		Random random = new Random();
-		int direction = random.nextInt(4);
-		return direction;
+		moveForward();
 	}
 
 	/**
@@ -147,17 +244,20 @@ public class Snake {
 	 * @param snake
 	 * @param direction
 	 */
-	private void moveForward(Snake snake) {
+	private void moveForward() {
+		Snake snake = this;
 		int delay = Constants.SNAKE_MOVE_INTERVAL_DEFAULT; // milliseconds
 
 		ActionListener taskPerformer = new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				// 移动一步
+				System.out.print(snake.getBody().get(0).getX() + "-"
+						+ snake.getBody().get(0).getY() + ",");
+				System.out.print(snake.getBody().get(1).getX() + "-"
+						+ snake.getBody().get(0).getY() + ",");
+				System.out.println(snake.getBody().get(2).getX() + "-"
+						+ snake.getBody().get(0).getY() + ",");
 				moveOneStep();
-				System.out.print(snake.getBody().get(0).getX() + "-" + snake.getBody().get(0).getY() + ",");
-				System.out.print(snake.getBody().get(1).getX() + "-" + snake.getBody().get(0).getY() + ",");
-				System.out.print(snake.getBody().get(2).getX() + "-" + snake.getBody().get(0).getY() + ",");
-				System.out.println(snake.getBody().get(3).getX() + "-" + snake.getBody().get(0).getY());
 			}
 		};
 		timer = new Timer(delay, taskPerformer);
@@ -170,12 +270,12 @@ public class Snake {
 	 * 
 	 */
 	private void moveOneStep() {
-		int direction = getDirection();
-		//判断蛇是否死亡
+		// 判断蛇是否死亡
 		Block head = this.getBody().get(0);
-		Block headTemp = new Block(head.getX(), head.getY(), this.panel);
-		headTemp.moveDirection(direction);
-		if (isBody(headTemp) || !isInBounds(headTemp)) {
+		Block headTemp = new Block(head.getX(), head.getY(), null);
+		int direct = this.direction;
+
+		if (!headTemp.moveDirection(this, direction, false)) {
 			dead();
 			return;
 		}
@@ -183,10 +283,42 @@ public class Snake {
 		//
 		for (int i = 0; i < this.body.size(); i++) {
 			Block b = this.body.get(i);
-			b.moveDirection(direction);
+			System.out.println("before:" + b.getX() + "-" + b.getY());
+			if (!b.equals(turner)) {
+				direct = this.getTurnDirection();
+			}
+			b.moveDirection(this, direct, true);
+			System.out.println("after:" + b.getX() + "-" + b.getY());
 			bodyTemp.add(b);
 		}
 		this.body = bodyTemp;
+	}
+
+	/**
+	 * 获取蛇尾距转角的运动方向
+	 * 
+	 * @return
+	 */
+	private int getTurnDirection() {
+		int direction = 0;
+		Block end = this.body.get(this.body.size() - 1);
+		if (end.getX() - turner.getX() < 0) {
+			// 向右
+			direction = DirectionEnum.RIGHT.code;
+		}
+		if (end.getX() - turner.getX() > 0) {
+			// 向左
+			direction = DirectionEnum.LEFT.code;
+		}
+		if (end.getY() - turner.getY() < 0) {
+			// 向下
+			direction = DirectionEnum.DOWN.code;
+		}
+		if (end.getY() - turner.getY() > 0) {
+			// 向上
+			direction = DirectionEnum.UP.code;
+		}
+		return direction;
 	}
 
 	/**
@@ -200,15 +332,32 @@ public class Snake {
 	}
 
 	/**
+	 * 是否在游戏出生边界内
+	 * 
+	 * @param block
+	 * @return
+	 */
+	public boolean isInBurnBounds(Block block) {
+
+		return block.getX() > Constants.BOUNDS_BLOCK_NUM * Constants.BLOCK_SIZE
+				&& block.getX() < (maxX - Constants.BOUNDS_BLOCK_NUM
+						* Constants.BLOCK_SIZE)
+				&& block.getY() > Constants.BOUNDS_BLOCK_NUM
+						* Constants.BLOCK_SIZE
+				&& block.getY() < (maxY - Constants.BOUNDS_BLOCK_NUM
+						* Constants.BLOCK_SIZE);
+	}
+
+	/**
 	 * 是否在游戏边界内
 	 * 
 	 * @param block
 	 * @return
 	 */
-	private boolean isInBounds(Block block) {
+	public boolean isInBounds(Block block) {
 
-		return block.getX() > Constants.BOUNDS_BLOCK_NUM && block.getX() < (maxX - Constants.BOUNDS_BLOCK_NUM)
-				&& block.getY() > Constants.BOUNDS_BLOCK_NUM && block.getY() < (maxY - Constants.BOUNDS_BLOCK_NUM);
+		return block.getX() >= 0 && block.getX() <= maxX && block.getY() >= 0
+				&& block.getY() <= maxY;
 	}
 
 	/**
@@ -216,9 +365,9 @@ public class Snake {
 	 * 
 	 * @return
 	 */
-	private boolean isBody(Block block) {
+	public boolean isBody(Block block) {
 
-		return this.getBody().contains(block);
+		return this.body.contains(block);
 	}
 
 	/**
@@ -245,14 +394,15 @@ public class Snake {
 			// 不可是蛇本身
 			for (Block b : body) {
 				if (block.equals(b)) {
-					
+
 				}
 
 			}
 		}
 
 		// 获取边界内的随机位置
-		while (!(randomX > Constants.BOUNDS_BLOCK_NUM && randomX < (maxX - Constants.BOUNDS_BLOCK_NUM)
+		while (!(randomX > Constants.BOUNDS_BLOCK_NUM
+				&& randomX < (maxX - Constants.BOUNDS_BLOCK_NUM)
 				&& randomY > Constants.BOUNDS_BLOCK_NUM && randomY < (maxY - Constants.BOUNDS_BLOCK_NUM))) {
 			randomX = random.nextInt(maxX);
 			randomY = random.nextInt(maxY);
@@ -262,7 +412,6 @@ public class Snake {
 	}
 
 	public static void main(String[] args) {
-		Snake snake = new Snake();
-		snake.move();
+
 	}
 }
