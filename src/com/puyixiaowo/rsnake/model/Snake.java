@@ -349,7 +349,7 @@ public class Snake {
 			randomX = random.nextInt(Constants.BLOCK_NUM)
 					* Constants.BLOCK_SIZE;
 			randomY = random
-					.nextInt(Constants.BLOCK_NUM * Constants.BLOCK_SIZE);
+					.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
 		}
 
 		while (apple
@@ -358,8 +358,9 @@ public class Snake {
 			randomX = random.nextInt(Constants.BLOCK_NUM)
 					* Constants.BLOCK_SIZE;
 			randomY = random
-					.nextInt(Constants.BLOCK_NUM * Constants.BLOCK_SIZE);
+					.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
 		}
+		System.out.println("randomX:" + randomX + ",randomY:" + randomY);
 		return new Block(randomX, randomY, this.panel);
 	}
 
