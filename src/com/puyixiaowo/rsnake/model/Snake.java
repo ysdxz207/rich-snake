@@ -121,8 +121,8 @@ public class Snake {
 	 * 初始化游戏世界
 	 */
 	private void initSnakeWord() {
-		this.maxX = this.panel.getWidth();
-		this.maxY = this.panel.getHeight();
+		this.maxX = this.panel.getWidth() - Constants.BLOCK_SIZE;
+		this.maxY = this.panel.getHeight() - Constants.BLOCK_SIZE;
 	}
 
 	/**
@@ -253,7 +253,7 @@ public class Snake {
 		for (int i = 0; i < this.body.size(); i++) {
 			Block b = this.body.get(i);
 			Block temp = new Block(b.getX(), b.getY(), this.panel);
-			if ((i - 1) < 0) {
+			if (i == 0) {
 				b.moveDirection(this, this.direction, true);
 			} else {
 				b.moveTo(b, latestBlock);
@@ -298,12 +298,12 @@ public class Snake {
 	 */
 	public boolean isInBurnBounds(Block block) {
 
-		return block.getX() > Constants.BOUNDS_BLOCK_NUM * Constants.BLOCK_SIZE
-				&& block.getX() < (maxX - Constants.BOUNDS_BLOCK_NUM
+		return block.getX() >= Constants.BOUNDS_BLOCK_NUM * Constants.BLOCK_SIZE
+				&& block.getX() <= (maxX - Constants.BOUNDS_BLOCK_NUM
 						* Constants.BLOCK_SIZE)
-				&& block.getY() > Constants.BOUNDS_BLOCK_NUM
+				&& block.getY() >= Constants.BOUNDS_BLOCK_NUM
 						* Constants.BLOCK_SIZE
-				&& block.getY() < (maxY - Constants.BOUNDS_BLOCK_NUM
+				&& block.getY() <= (maxY - Constants.BOUNDS_BLOCK_NUM
 						* Constants.BLOCK_SIZE);
 	}
 
@@ -318,7 +318,7 @@ public class Snake {
 		return block.getX() >= 0 && block.getX() <= maxX && block.getY() >= 0
 				&& block.getY() <= maxY;
 	}
-
+	
 	/**
 	 * 块是否是身体
 	 * 
@@ -338,23 +338,29 @@ public class Snake {
 	 *            是否是苹果
 	 * @return
 	 */
-	private Block getRandomPos(boolean bounds, boolean apple) {
+	private Block getRandomPos(boolean burnBounds, boolean apple) {
 		Random random = new Random();
 
 		int randomX = 0;
 		int randomY = 0;
-
 		// 获取边界内的随机位置
-		while (bounds
+		while (burnBounds
 				&& !isInBurnBounds(new Block(randomX, randomY, this.panel))) {
-			randomX = random.nextInt(maxX);
-			randomY = random.nextInt(maxY);
+			randomX = random.nextInt(Constants.BLOCK_NUM)
+					* Constants.BLOCK_SIZE;
+			randomY = random
+					.nextInt(Constants.BLOCK_NUM * Constants.BLOCK_SIZE);
 		}
+
 		while (apple
+				&& !isInBounds(new Block(randomX, randomY, this.panel))
 				&& isBody(new Block(randomX, randomY, this.panel))) {
-			randomX = random.nextInt(maxX);
-			randomY = random.nextInt(maxY);
+			randomX = random.nextInt(Constants.BLOCK_NUM)
+					* Constants.BLOCK_SIZE;
+			randomY = random
+					.nextInt(Constants.BLOCK_NUM * Constants.BLOCK_SIZE);
 		}
 		return new Block(randomX, randomY, this.panel);
 	}
+
 }

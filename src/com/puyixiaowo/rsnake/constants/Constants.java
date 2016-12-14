@@ -15,11 +15,11 @@ public class Constants {
 	/**
 	 * 默认蛇移动时间间隔
 	 */
-	public static final int SNAKE_MOVE_INTERVAL_DEFAULT = 600;
+	public static final int SNAKE_MOVE_INTERVAL_DEFAULT = 100;
 	/**
 	 * 游戏区域蛇方块份数
 	 */
-	public static int BLOCK_NUM = 40;
+	public static int BLOCK_NUM = 64;
 	/**
 	 * 蛇出生边界，距离游戏边界两个格子
 	 */

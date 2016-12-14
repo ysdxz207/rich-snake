@@ -161,6 +161,8 @@ public class Block {
 	public void moveTo(Block from, Block to) {
 		JLabel label = (JLabel) panel.getComponentAt(from.getX(), from.getY());
 		label.setLocation(to.getX(), to.getY());
+		this.setX(to.getX());
+		this.setY(to.getY());
 	}
 
 }

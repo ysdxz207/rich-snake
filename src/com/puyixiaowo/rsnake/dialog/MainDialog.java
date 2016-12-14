@@ -90,7 +90,9 @@ public class MainDialog extends JFrame {
 		panelMain.setSize(size);
 		panelMain.setBackground(new Color(255, 255, 255));
 		panelMain.setLayout(new GridBagLayout());
-		int widthPanel = panelMain.getHeight() - 40;
+		int subtraction = panelMain.getHeight() % 64;
+		int widthPanel = panelMain.getHeight() - subtraction;
+		System.out.println("减数：" + subtraction + ",游戏画布长宽：" + widthPanel);
 
 		panel.setSize(widthPanel, widthPanel);
 		GridBagConstraints gridBagConstraints = new GridBagConstraints();
