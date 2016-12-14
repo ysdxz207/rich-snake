@@ -10,6 +10,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.HeadlessException;
 import java.awt.Insets;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -18,6 +20,7 @@ import javax.swing.JPanel;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.enums.DirectionEnum;
 import com.puyixiaowo.rsnake.model.Screen;
 import com.puyixiaowo.rsnake.model.Snake;
 
@@ -88,6 +91,7 @@ public class MainDialog extends JFrame {
 		Dimension size = contentPane.getSize(); // 可视区域的大小
 
 		panelMain.setSize(size);
+
 		panelMain.setBackground(new Color(255, 255, 255));
 		panelMain.setLayout(new GridBagLayout());
 		int subtraction = panelMain.getHeight() % 64;
@@ -113,11 +117,55 @@ public class MainDialog extends JFrame {
 		panelMain.add(panel, gridBagConstraints);
 
 		frame.add(panelMain);
-		
-		Constants.BLOCK_SIZE = panel.getWidth() / Constants.BLOCK_NUM;//设置方块大小
+		initSnake(frame, panel, panelMain);
+		frame.setFocusable(true);// 不设置则无法触发listener
+		frame.requestFocus();
+		setFocusTraversalKeysEnabled(false);
+	}
+
+	private void initSnake(JFrame frame, JPanel panel, JPanel panelMain) {
+		Constants.BLOCK_SIZE = panel.getWidth() / Constants.BLOCK_NUM;// 设置方块大小
 		// ///
 		Snake snake = new Snake(panel);
 		snake.move();
+		// 监控玩家操控方向
+		frame.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				switch (e.getKeyCode()) {
+				case KeyEvent.VK_UP:
+					snake.setDirection(DirectionEnum.UP.code);
+					System.out.println("上");
+					break;
+				case KeyEvent.VK_DOWN:
+					snake.setDirection(DirectionEnum.DOWN.code);
+					System.out.println("下");
+					break;
+				case KeyEvent.VK_LEFT:
+					snake.setDirection(DirectionEnum.LEFT.code);
+					System.out.println("左");
+					break;
+				case KeyEvent.VK_RIGHT:
+					snake.setDirection(DirectionEnum.RIGHT.code);
+					System.out.println("右");
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+
+			}
+		});
 	}
 
 	public static void main(String[] args) {

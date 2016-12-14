@@ -28,7 +28,6 @@ public class Snake {
 	private JPanel panel;// 蛇所在画布
 	private Timer timer;
 	private int direction = -1;
-	private int gamerDirection = -1;
 	private Block latestBlock = null;
 
 	/**
@@ -107,14 +106,6 @@ public class Snake {
 		return direction;
 	}
 
-	public int getGamerDirection() {
-		return gamerDirection;
-	}
-
-	public void setGamerDirection(int gamerDirection) {
-		this.gamerDirection = gamerDirection;
-	}
-
 	// //////////////////////////////////////
 
 	/**
@@ -153,13 +144,10 @@ public class Snake {
 	private int getSnakeRandomDirection() {
 		if (this.direction < 0) {
 			this.direction = getRandomDirection();
-		} else {
-			// 获取键盘方向
-			this.direction = this.gamerDirection;
 		}
 		return direction;
 	}
-
+	
 	/**
 	 * 获取随机方向
 	 * 
@@ -216,6 +204,7 @@ public class Snake {
 	 * 蛇移动
 	 */
 	public void move() {
+		System.out.println("gamer direction:" + direction);
 		moveForward();
 	}
 
