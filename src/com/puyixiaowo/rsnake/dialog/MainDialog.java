@@ -12,15 +12,12 @@ import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
-import com.puyixiaowo.rsnake.enums.DirectionEnum;
 import com.puyixiaowo.rsnake.model.Screen;
 import com.puyixiaowo.rsnake.model.Snake;
 
@@ -68,22 +65,7 @@ public class MainDialog extends JFrame {
 		JPanel panelMain = new JPanel();
 		JPanel panel = new JPanel();
 		centerFrame(frame);
-		frame.addWindowListener(new WindowAdapter() {
-
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.
-			 * WindowEvent)
-			 */
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				System.exit(0);
-			}
-
-		});
-
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//关闭窗口退出虚拟机
 		Container contentPane = frame.getContentPane();
 		frame.setVisible(true);
 		// 注意只有窗口显示后getLocationOnScreen才可以调用，否则出错
@@ -115,50 +97,34 @@ public class MainDialog extends JFrame {
 		panel.setBackground(ColorEnum.COLOR_BG.toColor());
 		panel.setLayout(null);
 		panelMain.add(panel, gridBagConstraints);
-
+		
 		frame.add(panelMain);
-		initSnake(frame, panel, panelMain);
 		frame.setFocusable(true);// 不设置则无法触发listener
 		frame.requestFocus();
-		setFocusTraversalKeysEnabled(false);
+		initSnake(frame, panel, panelMain);
+		
 	}
 
 	private void initSnake(JFrame frame, JPanel panel, JPanel panelMain) {
 		Constants.BLOCK_SIZE = panel.getWidth() / Constants.BLOCK_NUM;// 设置方块大小
 		// ///
 		Snake snake = new Snake(panel);
-		snake.move();
+		
 		// 监控玩家操控方向
 		frame.addKeyListener(new KeyListener() {
 
 			@Override
 			public void keyTyped(KeyEvent e) {
-				switch (e.getKeyCode()) {
-				case KeyEvent.VK_UP:
-					snake.setDirection(DirectionEnum.UP.code);
-					System.out.println("上");
-					break;
-				case KeyEvent.VK_DOWN:
-					snake.setDirection(DirectionEnum.DOWN.code);
-					System.out.println("下");
-					break;
-				case KeyEvent.VK_LEFT:
-					snake.setDirection(DirectionEnum.LEFT.code);
-					System.out.println("左");
-					break;
-				case KeyEvent.VK_RIGHT:
-					snake.setDirection(DirectionEnum.RIGHT.code);
-					System.out.println("右");
-					break;
-
-				default:
-					break;
-				}
+				
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-
+				// 不可以倒退
+				if ((e.getKeyCode() + snake.getDirection()) != 78
+						&& (e.getKeyCode() + snake.getDirection() != 76)) {
+					snake.setDirection(e.getKeyCode());
+				}
 			}
 
 			@Override
@@ -166,8 +132,9 @@ public class MainDialog extends JFrame {
 
 			}
 		});
+		snake.move();
 	}
-
+	
 	public static void main(String[] args) {
 		try {
 			org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();

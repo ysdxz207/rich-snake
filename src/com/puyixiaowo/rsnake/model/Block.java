@@ -3,12 +3,13 @@
  */
 package com.puyixiaowo.rsnake.model;
 
+import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
 
 /**
@@ -71,19 +72,19 @@ public class Block {
 		Random random = new Random();
 		int direction = random.nextInt(4);//四个方向
 		switch (direction) {
-		case 0:
+		case KeyEvent.VK_UP:
 			// 向上
 			y -= size;
 			break;
-		case 1:
+		case KeyEvent.VK_DOWN:
 			// 向下
 			y += size;
 			break;
-		case 2:
+		case KeyEvent.VK_LEFT:
 			// 向左
 			x -= size;
 			break;
-		case 3:
+		case KeyEvent.VK_RIGHT:
 			// 向右
 			x += size;
 			break;
@@ -100,28 +101,29 @@ public class Block {
 	}
 	
 	/**
-	 * 获取朝某放向移动一个格子
+	 * 头部朝某放向移动一个格子
 	 * 
 	 * @param direction
 	 * @return
 	 */
-	public boolean moveDirection(Snake snake, int direction, boolean isMove) {
+	public boolean moveHeadDirection(Snake snake, int direction, boolean isMove) {
+		
 		int x = this.getX();
 		int y = this.getY();
 		int size = Constants.BLOCK_SIZE;
 		Block point = new Block(x, y, this.panel);
 		switch (direction) {
-		case 0:
+		case KeyEvent.VK_UP:
 			y -= size;
 			break;
-		case 1:
+		case KeyEvent.VK_DOWN:
 			y += size;
 			break;
-		case 2:
-			x += size;
-			break;
-		case 3:
+		case KeyEvent.VK_LEFT:
 			x -= size;
+			break;
+		case KeyEvent.VK_RIGHT:
+			x += size;
 			break;
 		default:
 			break;
@@ -132,6 +134,11 @@ public class Block {
 		}
 		if (isMove){
 			moveTo(point, to);
+			//若有苹果则吃掉
+			if (Constants.apple.getX() == to.getX() && Constants.apple.getY() == to.getY()) {
+				System.out.println("吃吃吃吃吃");
+				snake.eatApple();
+			}
 		}
 		return true;
 	}
@@ -142,12 +149,12 @@ public class Block {
 	 * @param panel
 	 * @param block
 	 */
-	public void draw() {
+	public void draw(Color color) {
 		JLabel label = new JLabel();
 		label.setSize(panel.getWidth() / Constants.BLOCK_NUM, panel.getHeight() / Constants.BLOCK_NUM);
 		label.setOpaque(true);// 设置组件JLabel不透明，只有设置为不透明，设置背景色才有效
 		label.setBorder(null);
-		label.setBackground(ColorEnum.COLOR_SNAKE.toColor());
+		label.setBackground(color);
 		label.setLocation(this.getX(), this.getY());
 		panel.add(label);
 	}

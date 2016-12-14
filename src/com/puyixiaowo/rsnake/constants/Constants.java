@@ -5,6 +5,8 @@ package com.puyixiaowo.rsnake.constants;
 
 import javax.swing.JPanel;
 
+import com.puyixiaowo.rsnake.model.Block;
+
 /**
  * @author weishaoqiang
  * @date 2016年12月11日 下午2:01:05
@@ -33,4 +35,8 @@ public class Constants {
 	 * 方块大小
 	 */
 	public static int BLOCK_SIZE;
+	/**
+	 * 苹果
+	 */
+	public static Block apple;
 }

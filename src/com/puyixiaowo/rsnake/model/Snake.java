@@ -3,15 +3,18 @@
  */
 package com.puyixiaowo.rsnake.model;
 
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
 
 /**
@@ -47,6 +50,18 @@ public class Snake {
 		initSnakeWord();
 		this.born();
 		this.draw();
+		this.giveApple();
+	}
+
+	/**
+	 * 创建苹果
+	 */
+	private void giveApple() {
+		Block block = this.getRandomPos(false, true);
+		System.out.println("apple position:" + block.getX() + "," + block.getY());
+		Constants.apple = block;
+		block.draw(ColorEnum.COLOR_APPLE.toColor());
+		
 	}
 
 	/**
@@ -54,7 +69,7 @@ public class Snake {
 	 */
 	private void draw() {
 		for (Block block : this.getBody()) {
-			block.draw();
+			block.draw(ColorEnum.COLOR_SNAKE.toColor());
 		}
 	}
 
@@ -155,15 +170,15 @@ public class Snake {
 	 */
 	private int getRandomDirection() {
 		Random random = new Random();
-		int direction = random.nextInt(4);
+		int direction = random.nextInt(4) + 37;
 		// 不可以倒退
-		if ((direction + this.direction) == 1
-				|| (direction + this.direction == 5)) {
+		if ((direction + this.direction) == 78
+				|| (direction + this.direction == 76)) {
 			getRandomDirection();
 		}
 		// 不可以是身体方向
 		Block head = this.body.get(0);
-		if (!head.moveDirection(this, direction, false)) {
+		if (!head.moveHeadDirection(this, direction, false)) {
 			getRandomDirection();
 		}
 		return direction;
@@ -184,6 +199,18 @@ public class Snake {
 			this.body.add(block);
 		}
 
+	}
+	
+	/**
+	 * 获取蛇身下一个带方向的方块
+	 * 
+	 * @return
+	 */
+	private void nextBodyDirectionBlock() {
+		
+		Block lastBlock = this.body.get(this.body.size() - 1);
+		Block block = new Block(lastBlock.getX(), lastBlock.getY(), this.panel);
+		this.body.add(block);
 	}
 
 	/**
@@ -243,7 +270,7 @@ public class Snake {
 			Block b = this.body.get(i);
 			Block temp = new Block(b.getX(), b.getY(), this.panel);
 			if (i == 0) {
-				b.moveDirection(this, this.direction, true);
+				b.moveHeadDirection(this, this.direction, true);
 			} else {
 				b.moveTo(b, latestBlock);
 			}
@@ -266,7 +293,7 @@ public class Snake {
 	 * @return
 	 */
 	public boolean isDead(Snake snake) {
-		return !this.body.get(0).moveDirection(snake, direction, false);
+		return !this.body.get(0).moveHeadDirection(snake, direction, false);
 	}
 
 	/**
@@ -329,9 +356,11 @@ public class Snake {
 	 */
 	private Block getRandomPos(boolean burnBounds, boolean apple) {
 		Random random = new Random();
-
-		int randomX = 0;
-		int randomY = 0;
+		
+		int randomX = random.nextInt(Constants.BLOCK_NUM)
+				* Constants.BLOCK_SIZE;
+		int randomY = random
+				.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
 		// 获取边界内的随机位置
 		while (burnBounds
 				&& !isInBurnBounds(new Block(randomX, randomY, this.panel))) {
@@ -349,8 +378,21 @@ public class Snake {
 			randomY = random
 					.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
 		}
+		System.out.println("***********" + Constants.BLOCK_SIZE + "===" + Constants.BLOCK_NUM);
 		System.out.println("randomX:" + randomX + ",randomY:" + randomY);
 		return new Block(randomX, randomY, this.panel);
+	}
+
+	/**
+	 * 吃苹果
+	 */
+	public void eatApple() {
+		this.nextBodyDirectionBlock();
+		//移除苹果
+		JLabel apple = (JLabel)this.panel.getComponentAt(new Point(Constants.apple.getX(),Constants.apple.getY()));
+		apple.remove(apple);
+		giveApple();
+		
 	}
 
 }
