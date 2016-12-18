@@ -70,7 +70,7 @@ public class Block {
 		int size = Constants.BLOCK_SIZE;
 
 		Random random = new Random();
-		int direction = random.nextInt(4);//四个方向
+		int direction = random.nextInt(4) + 37;//四个方向
 		switch (direction) {
 		case KeyEvent.VK_UP:
 			// 向上
@@ -133,12 +133,11 @@ public class Block {
 			return false;
 		}
 		if (isMove){
-			moveTo(point, to);
 			//若有苹果则吃掉
 			if (Constants.apple.getX() == to.getX() && Constants.apple.getY() == to.getY()) {
-				System.out.println("吃吃吃吃吃");
 				snake.eatApple();
 			}
+			moveTo(point, to);
 		}
 		return true;
 	}
@@ -151,7 +150,7 @@ public class Block {
 	 */
 	public void draw(Color color) {
 		JLabel label = new JLabel();
-		label.setSize(panel.getWidth() / Constants.BLOCK_NUM, panel.getHeight() / Constants.BLOCK_NUM);
+		label.setSize(Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
 		label.setOpaque(true);// 设置组件JLabel不透明，只有设置为不透明，设置背景色才有效
 		label.setBorder(null);
 		label.setBackground(color);

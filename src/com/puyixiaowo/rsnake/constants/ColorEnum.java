@@ -12,9 +12,9 @@ import com.puyixiaowo.rsnake.util.ColorUtil;
  * @date 2016年12月12日 下午10:34:26
  */
 public enum ColorEnum {
-	COLOR_BG("#a8f9e7"),
+	COLOR_BG("#ede2b5"),
 	COLOR_SNAKE("#f37b1d"),
-	COLOR_APPLE("#da0c01");
+	COLOR_APPLE("#3adb76");
 	
 	ColorEnum(String color){
 		this.color = color;

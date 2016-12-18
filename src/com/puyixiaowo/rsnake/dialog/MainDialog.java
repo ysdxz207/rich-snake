@@ -6,6 +6,7 @@ package com.puyixiaowo.rsnake.dialog;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.HeadlessException;
@@ -14,12 +15,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.model.Game;
 import com.puyixiaowo.rsnake.model.Screen;
 import com.puyixiaowo.rsnake.model.Snake;
+
 
 /**
  * @author weishaoqiang
@@ -98,6 +102,40 @@ public class MainDialog extends JFrame {
 		panel.setLayout(null);
 		panelMain.add(panel, gridBagConstraints);
 		
+		
+		GridBagConstraints gridAlert = new GridBagConstraints();
+		gridAlert.gridx = 0;
+		gridAlert.gridy = 0;
+		gridAlert.gridwidth = 1;
+		gridAlert.gridheight = 1;
+		gridAlert.weightx = 0;
+		gridAlert.weighty = 0;
+		gridAlert.anchor = GridBagConstraints.NORTHWEST;
+		gridAlert.fill = GridBagConstraints.NONE;
+		gridAlert.insets = new Insets(0, 0, 0, 0);
+		gridAlert.ipadx = 200;
+		gridAlert.ipady = 200;
+
+		
+		JLabel labelAlert = new JLabel("游戏已结束");
+		panelMain.setFont(new Font("微软雅黑",Font.BOLD,36));
+		panelMain.add(labelAlert, gridAlert);
+		
+		
+		/*
+		JButton btnStart = new JButton("开始游戏");
+		btnStart.setVisible(true);
+		btnStart.setEnabled(true);
+		btnStart.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				btnStart.setText("暂停");
+				Snake.timer.start();
+			}
+		});
+		panelMain.add(btnStart);*/
+		
 		frame.add(panelMain);
 		frame.setFocusable(true);// 不设置则无法触发listener
 		frame.requestFocus();
@@ -120,16 +158,20 @@ public class MainDialog extends JFrame {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// 不可以倒退
-				if ((e.getKeyCode() + snake.getDirection()) != 78
-						&& (e.getKeyCode() + snake.getDirection() != 76)) {
-					snake.setDirection(e.getKeyCode());
+				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+					System.out.println("start or pause");
+					//暂停或继续游戏
+					Game.pauseOrContinue();
 				}
 			}
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-
+				// 不可以倒退
+				if (e.getKeyCode() >= 37 && e.getKeyCode() <= 40 && (e.getKeyCode() + snake.getDirection()) != 78
+						&& (e.getKeyCode() + snake.getDirection() != 76)) {
+					snake.setDirection(e.getKeyCode());
+				}
 			}
 		});
 		snake.move();
@@ -142,7 +184,7 @@ public class MainDialog extends JFrame {
 
 		}
 
-		MainDialog mainDialog = new MainDialog();
+		new MainDialog();
 
 	}
 }
