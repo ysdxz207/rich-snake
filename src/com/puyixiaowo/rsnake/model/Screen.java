@@ -26,7 +26,6 @@ public class Screen {
 		Dimension   screensize   =   Toolkit.getDefaultToolkit().getScreenSize();
 		this.width = (int)screensize.getWidth();//屏幕宽度
 		this.height = (int)screensize.getHeight();//屏幕高度
-		System.out.println(width + "--" + height);
 	}
 
 	public int getWidth() {

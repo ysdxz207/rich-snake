@@ -4,18 +4,17 @@
 package com.puyixiaowo.rsnake.model;
 
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.Timer;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.thread.GameThread;
+import com.puyixiaowo.rsnake.util.BlockUtil;
 
 /**
  * @author weishaoqiang
@@ -23,78 +22,65 @@ import com.puyixiaowo.rsnake.constants.Constants;
  */
 public class Snake {
 
-	private List<Block> body;
-	private int maxX;
-	private int maxY;
+	// 使用volatile关键字保其可见性
+	volatile private static Snake instance = null;
+
+	private static List<Block> body;
+	private static int maxX;
+	private static int maxY;
 
 	// /
 	private JPanel panel;// 蛇所在画布
-	public static Timer timer;
 	private int direction = -1;
 	private Block latestBlock = null;
 	private int currentDirection;// 当前运动方向
+	public static GameThread thread;
+	
+	public static Snake getInstance() {
+		if (instance == null) {// 懒汉式
+			System.err.println("无Snake实例");
+		}
+		return instance;
+	}
+	
 
-	/**
-	 * 
-	 */
-	public Snake() {
-		initSnakeWord();
-		this.born();
-		this.draw();
+	public static Snake getInstance(JPanel panel) {
+		try {
+			if (instance != null) {// 懒汉式
+
+			} else {
+				// 创建实例之前可能会有一些准备性的耗时工作
+				Thread.sleep(300);
+				synchronized (Snake.class) {
+					if (instance == null) {// 二次检查
+						instance = new Snake(panel);
+					}
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return instance;
 	}
 
 	/**
 	 * @param panel
 	 */
-	public Snake(JPanel panel) {
+	private Snake(JPanel panel) {
 		this.panel = panel;
-		initSnakeWord();
-		this.born();
-		this.draw();
-		this.giveApple();
-	}
-
-	/**
-	 * 创建苹果
-	 */
-	private void giveApple() {
-		Block block = this.getRandomPos(false, true);
-		System.out.println("apple position:" + block.getX() + "," + block.getY());
-		Constants.apple = block;
-		block.draw(ColorEnum.COLOR_APPLE.toColor());
 	}
 
 	/**
 	 * 绘制蛇身
 	 */
-	private void draw() {
-		for (Block block : this.getBody()) {
+	void draw() {
+		for (Block block : body) {
 			block.draw(ColorEnum.COLOR_SNAKE.toColor());
 		}
 	}
 
-	public List<Block> getBody() {
-		return body;
-	}
-
-	public void setBody(List<Block> body) {
-		this.body = body;
-	}
-
 	public int getMaxX() {
 		return maxX;
-	}
-
-	public void setMaxX(int maxX) {
-		this.maxX = maxX;
-	}
-
-	public int getMaxY() {
-		return maxY;
-	}
-
-	public void setMaxY(int maxY) {
-		this.maxY = maxY;
 	}
 
 	public JPanel getPanel() {
@@ -103,14 +89,6 @@ public class Snake {
 
 	public void setPanel(JPanel panel) {
 		this.panel = panel;
-	}
-
-	public Timer getTimer() {
-		return timer;
-	}
-
-	public void setTimer(Timer timer) {
-		this.timer = timer;
 	}
 
 	public void setDirection(int direction) {
@@ -122,13 +100,16 @@ public class Snake {
 	}
 
 	// //////////////////////////////////////
+	
+	
+	
 
 	/**
 	 * 初始化游戏世界
 	 */
-	private void initSnakeWord() {
-		this.maxX = this.panel.getWidth() - Constants.BLOCK_SIZE;
-		this.maxY = this.panel.getHeight() - Constants.BLOCK_SIZE;
+	void initSnakeWord() {
+		maxX = this.panel.getWidth() - Constants.BLOCK_SIZE;
+		maxY = this.panel.getHeight() - Constants.BLOCK_SIZE;
 	}
 
 	/**
@@ -136,7 +117,7 @@ public class Snake {
 	 * 
 	 * @return
 	 */
-	private void born() {
+	void born() {
 		body = new ArrayList<Block>();
 		for (int i = 0; i < Constants.SNAKE_LENGTH; i++) {
 			this.nextBodyBlock();
@@ -156,10 +137,8 @@ public class Snake {
 	 * @return
 	 */
 	private int getSnakeRandomDirection() {
-		if (this.direction < 0) {
-			this.direction = getRandomDirection();
-			this.currentDirection = this.direction;
-		}
+		this.direction = getRandomDirection();
+		this.currentDirection = this.direction;
 		return direction;
 	}
 
@@ -173,12 +152,12 @@ public class Snake {
 		int direction = random.nextInt(4) + 37;
 		// 不可以倒退
 		if ((direction + this.direction) == 78 || (direction + this.direction == 76)) {
-			getRandomDirection();
+			direction = getRandomDirection();
 		}
 		// 不可以是身体方向
-		Block head = new Block(this.body.get(0).getX(), this.body.get(0).getY(), panel);
+		Block head = new Block(body.get(0).getX(), body.get(0).getY(), panel);
 		if (!head.moveHeadDirection(this, direction, false)) {
-			getRandomDirection();
+			direction = getRandomDirection();
 		}
 		return direction;
 	}
@@ -189,13 +168,13 @@ public class Snake {
 	 * @return
 	 */
 	private void nextBodyBlock() {
-		if (this.body.size() == 0) {
-			Block head = getRandomPos(true, false);
-			this.body.add(head);
+		if (body.size() == 0) {
+			Block head = BlockUtil.getRandomPos(true, false);
+			body.add(head);
 		} else {
-			Block lastBlock = this.body.get(this.body.size() - 1);
+			Block lastBlock = body.get(body.size() - 1);
 			Block block = getNextNotBodyInBoundsBlock(lastBlock);
-			this.body.add(block);
+			body.add(block);
 		}
 
 	}
@@ -207,9 +186,9 @@ public class Snake {
 	 */
 	private void nextBodyDirectionBlock() {
 
-		Block lastBlock = this.body.get(this.body.size() - 1);
+		Block lastBlock = body.get(body.size() - 1);
 		Block block = new Block(lastBlock.getX(), lastBlock.getY(), this.panel);
-		this.body.add(block);
+		body.add(block);
 		block.draw(ColorEnum.COLOR_SNAKE.toColor());
 	}
 
@@ -222,7 +201,7 @@ public class Snake {
 	private Block getNextNotBodyInBoundsBlock(Block lastBlock) {
 		Block block = lastBlock.nextRandomBlock(this);
 		if (isBody(block) || !isInBurnBounds(block)) {
-			getNextNotBodyInBoundsBlock(lastBlock);
+			block = getNextNotBodyInBoundsBlock(lastBlock);
 		}
 		return block;
 	}
@@ -242,22 +221,13 @@ public class Snake {
 	 */
 	private void moveForward() {
 
-		ActionListener taskPerformer = new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				// 移动一步
-				moveOneStep();
-			}
-		};
-		timer = new Timer(Constants.SNAKE_MOVE_INTERVAL_DEFAULT, taskPerformer);
-		//timer.start();
-		while (true)
-			;
+		thread = new GameThread("游戏主线程");
 	}
 
 	/**
 	 * 
 	 */
-	private void moveOneStep() {
+	public void moveOneStep() {
 		// 不可与当前运动方向相反
 		if (this.direction != this.currentDirection
 				&& ((this.direction + this.currentDirection) == 76 || (this.direction + this.currentDirection) == 78)) {
@@ -271,8 +241,8 @@ public class Snake {
 		}
 
 		//
-		for (int i = 0; i < this.body.size(); i++) {
-			Block b = this.body.get(i);
+		for (int i = 0; i < body.size(); i++) {
+			Block b = body.get(i);
 			Block temp = new Block(b.getX(), b.getY(), this.panel);
 			if (i == 0) {
 				b.moveHeadDirection(this, this.direction, true);
@@ -280,16 +250,13 @@ public class Snake {
 				b.moveTo(b, latestBlock);
 			}
 			latestBlock = temp;
-			this.body.set(i, b);
+			body.set(i, b);
 		}
 		currentDirection = direction;
 
-		// System.out.print(this.getBody().get(0).getX() + "-" +
-		// this.getBody().get(0).getY() + ",");
-		// System.out.print(this.getBody().get(1).getX() + "-" +
-		// this.getBody().get(1).getY() + ",");
-		// System.out.println(this.getBody().get(2).getX() + "-" +
-		// this.getBody().get(2).getY());
+//		System.out.print(this.getBody().get(0).getX() + "-" + this.getBody().get(0).getY() + ",");
+//		System.out.print(this.getBody().get(1).getX() + "-" + this.getBody().get(1).getY() + ",");
+//		System.out.println(this.getBody().get(2).getX() + "-" + this.getBody().get(2).getY());
 	}
 
 	/**
@@ -300,17 +267,14 @@ public class Snake {
 	 */
 	public boolean isDead(Snake snake) {
 
-		return !this.body.get(0).moveHeadDirection(snake, direction, false);
+		return !body.get(0).moveHeadDirection(snake, direction, false);
 	}
 
 	/**
 	 * 
 	 */
-	private void dead() {
-		if (timer != null) {
-			timer.stop();
-			System.out.println("Snake dead!");
-		}
+	private static void dead() {
+		Game.gameOver();
 	}
 
 	/**
@@ -319,7 +283,7 @@ public class Snake {
 	 * @param block
 	 * @return
 	 */
-	public boolean isInBurnBounds(Block block) {
+	public static boolean isInBurnBounds(Block block) {
 
 		return block.getX() >= Constants.BOUNDS_BLOCK_NUM * Constants.BLOCK_SIZE
 				&& block.getX() <= (maxX - Constants.BOUNDS_BLOCK_NUM * Constants.BLOCK_SIZE)
@@ -333,7 +297,7 @@ public class Snake {
 	 * @param block
 	 * @return
 	 */
-	public boolean isInBounds(Block block) {
+	public static boolean isInBounds(Block block) {
 
 		return block.getX() >= 0 && block.getX() <= maxX && block.getY() >= 0 && block.getY() <= maxY;
 	}
@@ -343,7 +307,7 @@ public class Snake {
 	 * 
 	 * @return
 	 */
-	public boolean isBody(Block block) {
+	public static boolean isBody(Block block) {
 		for (Block b : body) {
 			if (b.getX() == block.getX() && b.getY() == block.getY()) {
 				return true;
@@ -352,35 +316,7 @@ public class Snake {
 		return false;
 	}
 
-	/**
-	 * 获取游戏边界内随机点
-	 * 
-	 * @param bounds
-	 *            是否在出生边界内
-	 * @param apple
-	 *            是否是苹果
-	 * @return
-	 */
-	private Block getRandomPos(boolean burnBounds, boolean apple) {
-		Random random = new Random();
-
-		int randomX = random.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
-		int randomY = random.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
-		// 获取边界内的随机位置
-		while (burnBounds && !isInBurnBounds(new Block(randomX, randomY, this.panel))) {
-			randomX = random.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
-			randomY = random.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
-		}
-
-		while (apple && !isInBounds(new Block(randomX, randomY, this.panel))
-				&& isBody(new Block(randomX, randomY, this.panel))) {
-			randomX = random.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
-			randomY = random.nextInt(Constants.BLOCK_NUM) * Constants.BLOCK_SIZE;
-		}
-		System.out.println("***********" + Constants.BLOCK_SIZE + "===" + Constants.BLOCK_NUM);
-		System.out.println("randomX:" + randomX + ",randomY:" + randomY);
-		return new Block(randomX, randomY, this.panel);
-	}
+	
 
 	/**
 	 * 吃苹果
@@ -391,6 +327,10 @@ public class Snake {
 		JLabel apple = (JLabel) this.panel.getComponentAt(new Point(Constants.apple.getX(), Constants.apple.getY()));
 		this.panel.remove(apple);
 		this.panel.repaint();
-		giveApple();
+		
+		//计分
+		
+		Game.giveApple();
 	}
+	
 }

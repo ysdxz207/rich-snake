@@ -12,12 +12,27 @@ import com.puyixiaowo.rsnake.model.Block;
  * @date 2016年12月11日 下午2:01:05
  */
 public class Constants {
+	/**
+	 * 窗体宽高
+	 */
+	public static final int WIDTH_FRAME = 820;
+	public static final int HEIGHT_FRAME = 640;
+	/**
+	 * 游戏区域宽高
+	 */
+	public static final int WIDTH_PANEL_GAME = 616;
+	public static final int HEIGHT_PANEL_GAME = 616;
+	
 	
 	public static final int SNAKE_LENGTH = 3;
 	/**
 	 * 默认蛇移动时间间隔
 	 */
-	public static final int SNAKE_MOVE_INTERVAL_DEFAULT = 100;
+	public static final long SNAKE_MOVE_INTERVAL_DEFAULT = 100;
+	/**
+	 * 游戏区域名称
+	 */
+	public static final String NAME_PANEL_GAME = "panelGame";
 	/**
 	 * 游戏区域蛇方块份数
 	 */

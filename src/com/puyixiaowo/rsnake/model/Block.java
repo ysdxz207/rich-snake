@@ -94,7 +94,7 @@ public class Block {
 			break;
 		}
 		Block block = new Block(x, y, this.getPanel());
-		if (snake.isBody(block)) {
+		if (Snake.isBody(block)) {
 			nextRandomBlock(snake);
 		}
 		return block;
@@ -129,7 +129,7 @@ public class Block {
 			break;
 		}
 		Block to = new Block(x, y, this.panel);
-		if (snake.isBody(to) || !snake.isInBounds(to)) {
+		if (Snake.isBody(to) || !Snake.isInBounds(to)) {
 			return false;
 		}
 		if (isMove){
