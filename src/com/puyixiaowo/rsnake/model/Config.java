@@ -5,8 +5,6 @@ package com.puyixiaowo.rsnake.model;
 
 import java.io.File;
 
-import javax.crypto.SecretKey;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.puyixiaowo.rsnake.constants.Constants;
@@ -71,32 +69,34 @@ public class Config {
 
 		Config.getInstance();
 
-		if (confExists()) {
+		if (isConfExists()) {
+			readConf();
 			return;
 		}
 
-		SecretKey key = EncryptUtils.createSecretDESKey();
-		Constants.DES_KEY = key;
-		
-		addUserConf("大帅比", -1);//添加默认用户配置
+		addUserConf("大帅比", -1);// 添加默认用户配置
 		saveConf();
 	}
 
 	/**
-	 * @return
+	 * 读取配置文件到全局变量
 	 */
-	private static JSONArray JSONArray() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * 读取配置文件
-	 */
-	public static JSONArray readConf() {
-		if (Constants.CONFIG == null) {
-			refreshConf();
+	public static JSONObject readConf() {
+		if (Constants.CONFIG != null) {
+			return Constants.CONFIG;
 		}
+		StringBuffer buffer = FileUtil.readToBuffer(filePath + Constants.CONFIG_FILE_NAME, Constants.ENCODE);
+		if (buffer == null) {
+			return null;
+		}
+		String str = buffer.toString();
+		String configsStr = null;
+		try {
+			configsStr = EncryptUtils.decryptByDES(Constants.DES_KEY, str);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Constants.CONFIG = JSONObject.parseObject(configsStr);
 		return Constants.CONFIG;
 	}
 
@@ -107,96 +107,130 @@ public class Config {
 	 * @return
 	 */
 	public static JSONObject readUserConf(String username) {
-		JSONArray configs = readConf();
-		if (configs != null) {
+		JSONObject config = readConf();
+		if (config != null) {
+			JSONArray configs = config.getJSONArray("configs");
 			for (Object confObj : configs) {
 				JSONObject conf = null;
 				if (confObj instanceof JSONObject) {
 					conf = (JSONObject) confObj;
 				}
-				if (conf.containsKey(username)) {
+				if (conf.containsValue(username)) {
 					return conf;
 				}
 			}
 		}
-		
+
 		return null;
 	}
 
 	/**
-	 * 刷新配置
+	 * 刷新全局变量配置
 	 */
-	private static void refreshConf() {
-		StringBuffer buffer = FileUtil.readToBuffer(filePath + Constants.CONFIG_FILE_NAME, Constants.ENCODE);
-		if (buffer == null) {
-			return;
-		}
-		String str = buffer.toString();
-		String configsStr = EncryptUtils.decryptByDES(Constants.DES_KEY, str);
-		Constants.CONFIG = JSONArray.parseArray(configsStr);
+	private static void refreshConf(JSONObject config) {
+
+		Constants.CONFIG = config;
 	}
 
 	/**
 	 * 添加用户配置
+	 * 
 	 * @param username
 	 * @param sc
-	 * 			分数
+	 *            分数
 	 */
 	public static void addUserConf(String username, int sc) {
 		JSONObject score = new JSONObject();
 		score.put("time", DateUtil.getNowStr());
 		score.put("sc", sc);
-		
+
 		if (isUserConfExists(username)) {
 			readUserConf(username).put("score", score);
 		} else {
-			//创建新的用户配置
+			// 创建新的用户配置
+			JSONObject config = new JSONObject();
 			JSONArray configs = new JSONArray();
 
 			JSONObject userConf = new JSONObject();
 			JSONArray scores = new JSONArray();
 			scores.add(score);
-			
+
 			userConf.put("username", username);
 			userConf.put("scores", scores);
 			configs.add(userConf);
 
-			Constants.CONFIG = configs;
+			config.put("currentUser", username);
+			config.put("configs", configs);
+
+			Constants.CONFIG = config;
 		}
-		
+
 	}
+
 	/**
 	 * 是否已有用户配置
+	 * 
 	 * @param username
 	 * @return
 	 */
 	private static boolean isUserConfExists(String username) {
-		
+
 		return readUserConf(username) != null;
 	}
 
 	/**
 	 * 保存配置到文件
 	 */
-	public static void saveConf(){
-		String str = EncryptUtils.encryptToDES(Constants.DES_KEY, Constants.CONFIG.toJSONString());
-
-		FileUtil.writeFile(str, filePath, Constants.CONFIG_FILE_NAME, Constants.ENCODE);
+	public static void saveConf() {
+		String str = null;
+		try {
+			str = EncryptUtils.encryptToDES(Constants.DES_KEY, Constants.CONFIG.toJSONString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		FileUtil.saveFile(filePath + Constants.CONFIG_FILE_NAME, str);
 	}
 
-	public static void saveScore(String username, int sc) {
-		JSONArray configs = readConf();
-		JSONObject userConf = readUserConf(username);
-		JSONArray scores = userConf.getJSONArray("scores");
+	public static void addScore(int sc) {
+		if (sc == 0) {
+			return;
+		}
+		JSONObject config = readConf();
+		JSONArray configs = config.getJSONArray("configs");
+		String currentUser = getCurrentUsername();
 
-		refreshConf();// 刷新配置
+		JSONObject userConf = readUserConf(currentUser);
+		configs.remove(userConf);
+
+		JSONArray scores = userConf.getJSONArray("scores");
+		JSONObject score = new JSONObject();
+		score.put("sc", sc);
+		score.put("time", DateUtil.getNowStr());
+		scores.add(score);
+		userConf.put("scores", scores);
+		configs.add(userConf);
+		config.put("configs", configs);
+		System.out.println(config);
+		refreshConf(config);// 刷新配置
 	}
 
 	/**
+	 * 配置文件是否存在
+	 * 
 	 * @return
 	 */
-	private static boolean confExists() {
+	private static boolean isConfExists() {
 		return new File(filePath + Constants.CONFIG_FILE_NAME).exists();
+	}
+
+	/**
+	 * 获取当前用户
+	 * 
+	 * @return
+	 */
+	public static String getCurrentUsername() {
+		JSONObject conf = readConf();
+		return conf.getString("currentUser");
 	}
 
 }

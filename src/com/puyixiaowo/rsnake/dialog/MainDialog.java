@@ -4,11 +4,14 @@
 package com.puyixiaowo.rsnake.dialog;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -17,6 +20,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
@@ -69,6 +73,19 @@ public class MainDialog extends JFrame {
 		frame.setResizable(false);
 		frame.setLayout(new GridLayout(1, 1));
 		centerFrame(frame);
+		frame.addWindowListener(new WindowAdapter() {
+
+			/* (non-Javadoc)
+			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
+			 */
+			@Override
+			public void windowClosing(WindowEvent e) {
+				super.windowClosing(e);
+				//保存分数
+				Config.saveConf();
+			}
+			
+		});
 	}
 
 	private void initPanelMain() {
@@ -81,19 +98,25 @@ public class MainDialog extends JFrame {
 		JLabel labelScoreText = new JLabel();
 		labelScoreText.setText("分数：");
 		labelScoreText.setFont(new Font("宋体", Font.BOLD, 22));
-		JLabel labelScore = new JLabel();
-		labelScore.setText(0 + "");
-		labelScore.setFont(new Font("宋体", Font.BOLD, 20));
-		labelScore.setName(Constants.NAME_LABEL_SCORE);
+		//分数显示
+		JTextField textScore = new JTextField();
+		
+		textScore.setBackground(new Color(248, 243, 224));
+		textScore.setBorder(null);
+		textScore.setEditable(false);
+		textScore.setColumns(30);
+		textScore.setText(0 + "");
+		textScore.setFont(new Font("宋体", Font.BOLD, 20));
+		textScore.setName(Constants.NAME_TEXT_SCORE);
 
 		panelScore.add(labelScoreText);
-		panelScore.add(labelScore);
+		panelScore.add(textScore);
 		panelMain.add(panelScore, BorderLayout.PAGE_START);
 
 		// 工具栏
-		JMenuBar menuBarNewGame = new JMenuBar();
-		frame.setJMenuBar(menuBarNewGame);
-
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+		//游戏
 		JMenu menuNewGame = new JMenu("游戏");
 		JMenuItem itemNewGame = new JMenuItem("新游戏");
 		itemNewGame.addActionListener(new ActionListener() {
@@ -104,7 +127,26 @@ public class MainDialog extends JFrame {
 			}
 		});
 		menuNewGame.add(itemNewGame);
-		menuBarNewGame.add(menuNewGame);
+		//分数
+		JMenu menuScore = new JMenu("分数");
+		JMenuItem itemScoreHighest = new JMenuItem("最高记录");
+		itemScoreHighest.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showHighestScore();
+			}
+		});
+		menuScore.add(itemScoreHighest);
+		menuBar.add(menuNewGame);
+		menuBar.add(menuScore);
+	}
+	
+	/**
+	 * 显示最高分
+	 */
+	public static void showHighestScore() {
+		new HighestScoreDialog(frame).setVisible(true);
 	}
 
 	private void initPanelGame() {
@@ -119,6 +161,7 @@ public class MainDialog extends JFrame {
 		int height = Constants.HEIGHT_PANEL_GAME - subtraction;
 
 		System.out.println("游戏区域：" + width + "x" + height);
+		
 
 		panelGame.setBorder(new EmptyBorder(width / 2, width / 2, width / 2, width / 2));
 		panelGame.setSize(width, height);

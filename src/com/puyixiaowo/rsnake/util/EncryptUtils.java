@@ -1,3 +1,4 @@
+
 package com.puyixiaowo.rsnake.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -256,7 +257,7 @@ public class EncryptUtils {
      * @return
      * @throws Exception
      */
-    public String encryptToDES(String key, String info) throws Exception {
+    public static String encryptToDES(String key, String info) throws Exception {
         return encrypt("DES", info, key);
     }
 
@@ -276,7 +277,7 @@ public class EncryptUtils {
      * @param sInfo
      * @return
      */
-    public String decryptByDES(String key, String sInfo) throws Exception {
+    public static String decryptByDES(String key, String sInfo) throws Exception {
         return decrypt("DES", sInfo, key);
     }
 
@@ -408,4 +409,5 @@ public class EncryptUtils {
             e.printStackTrace();
         }
     }
+    
 }

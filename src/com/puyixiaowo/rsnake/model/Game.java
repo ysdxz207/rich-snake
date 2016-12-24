@@ -4,12 +4,16 @@
 package com.puyixiaowo.rsnake.model;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.puyixiaowo.rsnake.GameState;
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
@@ -18,6 +22,7 @@ import com.puyixiaowo.rsnake.listener.GameListener;
 import com.puyixiaowo.rsnake.listener.PauseOrContinueListener;
 import com.puyixiaowo.rsnake.util.BlockUtil;
 import com.puyixiaowo.rsnake.util.ComponentUtil;
+import com.puyixiaowo.rsnake.util.MapUtil;
 
 /**
  * @author weishaoqiang
@@ -27,15 +32,15 @@ public class Game {
 
 	// 使用volatile关键字保其可见性
 	volatile private static Game instance = null;
-	
+
 	public static int score = 0;
 
 	private Collection<GameListener> listeners;
-	
+
 	public static Game getInstance() {
-//		if (instance == null) {// 懒汉式
-//			System.err.println("无Game实例");
-//		}
+		// if (instance == null) {// 懒汉式
+		// System.err.println("无Game实例");
+		// }
 		return instance;
 	}
 
@@ -64,46 +69,44 @@ public class Game {
 	 * 
 	 */
 	private Game(JPanel panelGame) {
-		//initSnake(panelGame);
+		// initSnake(panelGame);
 	}
-	
+
 	/**
 	 * 
 	 */
 	public static void newGame(JPanel panelGame) {
-		
+
 		Snake snake = null;
 		if (Game.isFirst()) {
-			//panelGame == null
+			// panelGame == null
 			// 监控玩家操控方向
 			panelGame.addKeyListener(new PauseOrContinueListener());
 		} else {
-			//panelGame != null
-			setScore(0);//设置分数为0
+			// panelGame != null
+			setScore(0);// 设置分数为0
 			snake = Snake.getInstance();
 			panelGame = snake.getPanel();
 		}
-		
+
 		panelGame.removeAll();// 清空游戏区域
 		panelGame.repaint();
 		initSnake(panelGame);
 		initGame(panelGame);
-		Game.getInstance().fireGameRuning();//触发游戏运行中
+		Game.getInstance().fireGameRuning();// 触发游戏运行中
 		Game.run();
 	}
 
-
 	/**
 	 * 设置分数
+	 * 
 	 * @param sc
 	 */
 	public static void setScore(int sc) {
 		Game.score = sc;
-		JLabel label =(JLabel) ComponentUtil.getComponentByName(Constants.NAME_LABEL_SCORE);
+		JTextField label = (JTextField) ComponentUtil.getComponentByName(Constants.NAME_TEXT_SCORE);
 		label.setText(Game.score + "");
 	}
-	
-	
 
 	/**
 	 * 运行游戏
@@ -124,22 +127,26 @@ public class Game {
 
 	public static void stopGame() {
 		Snake.thread.stopThread();
-		Game.getInstance().fireGameStop();//触发游戏停止
+		// 添加分数
+		Config.addScore(Game.score);
+		Game.getInstance().fireGameStop();// 触发游戏停止
 	}
 
 	public static void pauseGame() {
 		Snake.thread.pauseThread();
-		Game.getInstance().fireGamePause();//触发游戏暂停
+		Game.getInstance().fireGamePause();// 触发游戏暂停
 	}
 
 	public static void continueGame() {
 		Snake.thread.continueThread();
-		Game.getInstance().fireGameContinue();//触发游戏继续
+		Game.getInstance().fireGameContinue();// 触发游戏继续
 	}
-	
+
 	public static void gameOver() {
 		Snake.thread.stopThread();
-		Game.getInstance().fireGameOver();//触发游戏结束
+		// 添加分数
+		Config.addScore(Game.score);
+		Game.getInstance().fireGameOver();// 触发游戏结束
 		System.out.println("游戏结束！");
 	}
 
@@ -217,7 +224,7 @@ public class Game {
 	 * 触发游戏进行事件
 	 */
 	public void fireGameRuning() {
-		
+
 		if (listeners == null)
 			return;
 		GameEvent event = new GameEvent(this, GameState.RUNING);
@@ -253,7 +260,7 @@ public class Game {
 		GameEvent event = new GameEvent(this, GameState.STOP);
 		notifyListeners(event);
 	}
-	
+
 	/**
 	 * 触发游戏异常停止事件
 	 */
@@ -263,7 +270,7 @@ public class Game {
 		GameEvent event = new GameEvent(this, GameState.STOP_ERR, message);
 		notifyListeners(event);
 	}
-	
+
 	/**
 	 * 触发游戏结束事件
 	 */
@@ -273,7 +280,7 @@ public class Game {
 		GameEvent event = new GameEvent(this, GameState.GAME_OVER);
 		notifyListeners(event);
 	}
-	
+
 	/**
 	 * 触发游戏分数改变事件
 	 */
@@ -283,7 +290,7 @@ public class Game {
 		GameEvent event = new GameEvent(this, GameState.GAME_SCORE_CHANGE);
 		notifyListeners(event);
 	}
-	
+
 	/**
 	 * 通知所有的GameListener
 	 */
@@ -303,14 +310,14 @@ public class Game {
 			Game.getInstance(panel);
 		}
 	}
-	
+
 	/**
 	 * @param frame
 	 * @param panelGame
 	 * @param panelMain
 	 */
 	public static void initSnake(JPanel panelGame) {
-		
+
 		panelGame.requestFocus();
 		panelGame.setFocusable(true);
 		Constants.BLOCK_SIZE = panelGame.getWidth() / Constants.BLOCK_NUM;// 设置方块大小
@@ -340,11 +347,28 @@ public class Game {
 	 * 计分
 	 */
 	public static void calculateScore() {
-		int score = 0;
+		int score = Game.score;
 		score += Constants.PER_SCORE;
 		setScore(score);
 		Game.getInstance().fireGameScoreChange();
 	}
 
+	/**
+	 * 获取当前用户最高分
+	 * @return
+	 */
+	public static String getCurrentUserHighestScore() {
+		Map<String, Integer> map =  new HashMap<String, Integer>();
+		JSONObject userConfig = Config.readUserConf(Config.getCurrentUsername());
+		JSONArray scores = userConfig.getJSONArray("scores");
+		for (Object object : scores) {
+			JSONObject score = null;
+			if (object instanceof JSONObject) {
+				score = (JSONObject) object;
+			}
+			map.put(score.getString("time"), score.getInteger("sc"));
+		}
+		return MapUtil.getMaxValue(map).toString();
+	}
 
 }

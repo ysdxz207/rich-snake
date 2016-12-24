@@ -76,7 +76,7 @@ public class FileUtil {
 	 *            保存的内容；
 	 * @return
 	 */
-	public boolean saveFile(String filePath, String content) {
+	public static boolean saveFile(String filePath, String content) {
 		boolean successful = true;
 		FileOutputStream fout = null;
 		try {

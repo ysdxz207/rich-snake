@@ -6,7 +6,7 @@ package com.puyixiaowo.rsnake.constants;
 import javax.crypto.SecretKey;
 import javax.swing.JPanel;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.puyixiaowo.rsnake.model.Block;
 
 /**
@@ -48,13 +48,13 @@ public class Constants {
 	 */
 	public static final int PER_SCORE = 4;
 	/**
-	 * 计分板label名称
+	 * 计分板textfield名称
 	 */
-	public static final String NAME_LABEL_SCORE = "labelScore";
+	public static final String NAME_TEXT_SCORE = "labelScore";
 	/**
 	 * 游戏配置
 	 */
-	public static JSONArray CONFIG = null;
+	public static JSONObject CONFIG = null;
 	/**
 	 * 游戏区域蛇方块份数
 	 */
@@ -77,7 +77,7 @@ public class Constants {
 	 */
 	public static Block apple;
 	/**
-	 * des加密key
+	 * des加密key，需要是8位
 	 */
-	public static SecretKey DES_KEY;
+	public static String DES_KEY = "hupubao0";
 }

@@ -3,14 +3,12 @@
  */
 package com.puyixiaowo.rsnake.listener;
 
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.puyixiaowo.rsnake.GameState;
 import com.puyixiaowo.rsnake.constants.Constants;
 import com.puyixiaowo.rsnake.event.GameEvent;
-import com.puyixiaowo.rsnake.model.Game;
 import com.puyixiaowo.rsnake.util.ComponentUtil;
 
 /**
