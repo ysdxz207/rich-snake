@@ -14,6 +14,7 @@ import com.puyixiaowo.rsnake.GameState;
 public class GameEvent extends EventObject {
 	
 	private GameState gameState;
+	private String message;
 
 	/**
 	 * 
@@ -30,12 +31,31 @@ public class GameEvent extends EventObject {
 		this.gameState = gameState;
 	}
 
+	/**
+	 * @param game
+	 * @param stopErr
+	 * @param message2
+	 */
+	public GameEvent(Object source, GameState gameState, String message) {
+		super(source);
+		this.gameState = gameState;
+		this.message = message;
+	}
+
 	public GameState getGameState() {
 		return gameState;
 	}
 
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 	
 

@@ -7,6 +7,8 @@ import java.awt.Component;
 import java.awt.Container;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
@@ -19,7 +21,7 @@ import com.puyixiaowo.rsnake.model.Snake;
  */
 public class ComponentUtil {
 
-	public static Component findComponentByName(Container container, String componentName) {
+	private static Component findComponentByName(Container container, String componentName) {
 		for (Component component : container.getComponents()) {
 			if (componentName.equals(component.getName())) {
 				return component;
@@ -54,14 +56,37 @@ public class ComponentUtil {
 	 * @return
 	 */
 	public static Component getComponentByName(String name) {
+		JFrame frame = getFrame();
+		
+		return findComponentByName(frame, name);
+	}
+	/**
+	 * 获取窗口
+	 * @return
+	 */
+	public static JFrame getFrame(){
 		JFrame frame = null;
 		try {
 			frame = (JFrame) SwingUtilities.getRoot(Snake.getInstance().getPanel());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		return findComponentByName(frame, name);
+		return frame;
+	}
+	/**
+	 * 根据名称获取菜单
+	 * @param name
+	 * @return
+	 */
+	public static JMenu getMenuByName(String name){
+		JMenuBar menuBar = getFrame().getJMenuBar();
+		for (int i = 0; i < menuBar.getMenuCount(); i++) {
+			JMenu menu = menuBar.getMenu(i);
+			if (menu.getName() != null && menu.getName().equals(name)) {
+				return menu;
+			}
+		}
+		return null;
 	}
 
 }

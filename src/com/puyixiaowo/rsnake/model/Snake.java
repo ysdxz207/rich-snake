@@ -329,7 +329,7 @@ public class Snake {
 		this.panel.repaint();
 		
 		//计分
-		
+		Game.calculateScore();
 		Game.giveApple();
 	}
 	

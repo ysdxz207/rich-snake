@@ -3,23 +3,28 @@
  */
 package com.puyixiaowo.rsnake.dialog;
 
+import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+
+import org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.model.Config;
 import com.puyixiaowo.rsnake.model.Game;
 import com.puyixiaowo.rsnake.model.Screen;
 
@@ -52,17 +57,10 @@ public class MainDialog extends JFrame {
 	 * @param frame
 	 */
 	private void centerFrame(JFrame frame) {
-		// int width = screen.getWidth() * 4 / 5;// 窗体宽度
-		// int height = screen.getHeight() * 4 / 5;// 窗体高度
 
-		int width = Constants.WIDTH_FRAME;
-		int height = Constants.HEIGHT_FRAME;
-
-		int x = (screen.getWidth() - width) / 2;
-		int y = (screen.getHeight() - height) / 2;
-		System.out.println("frame size:" + width + "x" + height);
-		frame.setSize(width, height);
-		frame.setBounds(x, y, width, height);
+		int x = (screen.getWidth() - Constants.WIDTH_PANEL_GAME) / 2;
+		int y = 0;
+		frame.setLocation(x, y);
 	}
 
 	private void initFrame() {
@@ -75,20 +73,22 @@ public class MainDialog extends JFrame {
 
 	private void initPanelMain() {
 		panelMain = new JPanel();
-		panelMain.setLayout(new GridBagLayout());
+		panelMain.setLayout(new BoxLayout(panelMain, BoxLayout.PAGE_AXIS));
 
-		GridBagConstraints gridAlert = new GridBagConstraints();
-		gridAlert.gridx = 10;
-		gridAlert.gridy = 0;
-		gridAlert.gridwidth = 1;
-		gridAlert.gridheight = 1;
-		gridAlert.weightx = 0;
-		gridAlert.weighty = 0;
-		gridAlert.anchor = GridBagConstraints.NORTHWEST;
-		gridAlert.fill = GridBagConstraints.NONE;
-		gridAlert.insets = new Insets(0, 40, 0, 0);
+		// 计分板
+		JPanel panelScore = new JPanel();
+		panelScore.setSize(100, 40);
+		JLabel labelScoreText = new JLabel();
+		labelScoreText.setText("分数：");
+		labelScoreText.setFont(new Font("宋体", Font.BOLD, 22));
+		JLabel labelScore = new JLabel();
+		labelScore.setText(0 + "");
+		labelScore.setFont(new Font("宋体", Font.BOLD, 20));
+		labelScore.setName(Constants.NAME_LABEL_SCORE);
 
-		panelMain.setFont(new Font("宋体", Font.BOLD, 36));
+		panelScore.add(labelScoreText);
+		panelScore.add(labelScore);
+		panelMain.add(panelScore, BorderLayout.PAGE_START);
 
 		// 工具栏
 		JMenuBar menuBarNewGame = new JMenuBar();
@@ -97,7 +97,7 @@ public class MainDialog extends JFrame {
 		JMenu menuNewGame = new JMenu("游戏");
 		JMenuItem itemNewGame = new JMenuItem("新游戏");
 		itemNewGame.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				newGame();
@@ -105,15 +105,12 @@ public class MainDialog extends JFrame {
 		});
 		menuNewGame.add(itemNewGame);
 		menuBarNewGame.add(menuNewGame);
-
 	}
 
 	private void initPanelGame() {
 		panelGame = new JPanel();
 		panelGame.setBackground(ColorEnum.COLOR_BG.toColor());
-		panelGame.setLayout(null);
 		panelGame.setName(Constants.NAME_PANEL_GAME);
-
 		int subtraction = Constants.WIDTH_PANEL_GAME % 64;
 
 		System.out.println("减数=" + subtraction);
@@ -123,28 +120,17 @@ public class MainDialog extends JFrame {
 
 		System.out.println("游戏区域：" + width + "x" + height);
 
+		panelGame.setBorder(new EmptyBorder(width / 2, width / 2, width / 2, width / 2));
 		panelGame.setSize(width, height);
-
-		GridBagConstraints gridBagConstraints = new GridBagConstraints();
-		gridBagConstraints.gridx = 0;
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.gridwidth = 1;
-		gridBagConstraints.gridheight = 1;
-		gridBagConstraints.weightx = 0;
-		gridBagConstraints.weighty = 0;
-		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-		gridBagConstraints.fill = GridBagConstraints.NONE;
-		gridBagConstraints.insets = new Insets(0, 0, 0, 0);
-		gridBagConstraints.ipadx = width;
-		gridBagConstraints.ipady = height;
-
-		panelMain.add(panelGame, gridBagConstraints);
+		panelMain.add(panelGame, BorderLayout.PAGE_END);
 	}
 
 	/**
 	 * 
 	 */
 	private void initUI() {
+		Config.initConf();
+
 		initFrame();// 初始化窗口
 
 		initPanelMain();// 初始化画布
@@ -177,7 +163,12 @@ public class MainDialog extends JFrame {
 
 	public static void main(String[] args) {
 		try {
+			// 设置此开关量为false即表示关闭之，BeautyEye LNF中默认是true
+			BeautyEyeLNFHelper.translucencyAtFrameInactive = false;
+			// 设置本属性将改变窗口边框样式定义
+			BeautyEyeLNFHelper.frameBorderStyle = BeautyEyeLNFHelper.FrameBorderStyle.translucencyAppleLike;
 			org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();
+			UIManager.put("RootPane.setupButtonVisible", false);//关闭设置按钮
 		} catch (Exception e) {
 
 		}

@@ -3,8 +3,10 @@
  */
 package com.puyixiaowo.rsnake.constants;
 
+import javax.crypto.SecretKey;
 import javax.swing.JPanel;
 
+import com.alibaba.fastjson.JSONArray;
 import com.puyixiaowo.rsnake.model.Block;
 
 /**
@@ -15,8 +17,8 @@ public class Constants {
 	/**
 	 * 窗体宽高
 	 */
-	public static final int WIDTH_FRAME = 820;
-	public static final int HEIGHT_FRAME = 640;
+//	public static final int WIDTH_FRAME = 820;
+//	public static final int HEIGHT_FRAME = 640;
 	/**
 	 * 游戏区域宽高
 	 */
@@ -33,6 +35,26 @@ public class Constants {
 	 * 游戏区域名称
 	 */
 	public static final String NAME_PANEL_GAME = "panelGame";
+	/**
+	 * 游戏配置文件名称
+	 */
+	public static final String CONFIG_FILE_NAME = "conf.rs";
+	/**
+	 * 字符编码
+	 */
+	public static final String ENCODE = "UTF-8";
+	/**
+	 * 吃一个苹果得4分
+	 */
+	public static final int PER_SCORE = 4;
+	/**
+	 * 计分板label名称
+	 */
+	public static final String NAME_LABEL_SCORE = "labelScore";
+	/**
+	 * 游戏配置
+	 */
+	public static JSONArray CONFIG = null;
 	/**
 	 * 游戏区域蛇方块份数
 	 */
@@ -54,4 +76,8 @@ public class Constants {
 	 * 苹果
 	 */
 	public static Block apple;
+	/**
+	 * des加密key
+	 */
+	public static SecretKey DES_KEY;
 }

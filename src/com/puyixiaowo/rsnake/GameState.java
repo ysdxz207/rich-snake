@@ -13,5 +13,6 @@ public enum GameState {
 	PAUSE,
 	CONTINUE,
 	GAME_OVER,
-	STOP_ERR;
+	STOP_ERR,
+	GAME_SCORE_CHANGE;
 }

@@ -32,7 +32,7 @@ public class GameThread extends Thread {
 				}
 			} catch (Exception e) {
 				System.out.println("线程异常终止..." + e.getMessage());
-				Game.getInstance().fireGameStopErr();
+				Game.getInstance().fireGameStopErr(e.getMessage());
 			}
 		}
 

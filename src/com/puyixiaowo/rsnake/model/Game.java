@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.puyixiaowo.rsnake.GameState;
@@ -16,6 +17,7 @@ import com.puyixiaowo.rsnake.event.GameEvent;
 import com.puyixiaowo.rsnake.listener.GameListener;
 import com.puyixiaowo.rsnake.listener.PauseOrContinueListener;
 import com.puyixiaowo.rsnake.util.BlockUtil;
+import com.puyixiaowo.rsnake.util.ComponentUtil;
 
 /**
  * @author weishaoqiang
@@ -25,6 +27,8 @@ public class Game {
 
 	// 使用volatile关键字保其可见性
 	volatile private static Game instance = null;
+	
+	public static int score = 0;
 
 	private Collection<GameListener> listeners;
 	
@@ -42,7 +46,7 @@ public class Game {
 			} else {
 				// 创建实例之前可能会有一些准备性的耗时工作
 				Thread.sleep(300);
-				synchronized (Snake.class) {
+				synchronized (Game.class) {
 					if (instance == null) {// 二次检查
 						instance = new Game(panel);
 					}
@@ -67,6 +71,7 @@ public class Game {
 	 * 
 	 */
 	public static void newGame(JPanel panelGame) {
+		
 		Snake snake = null;
 		if (Game.isFirst()) {
 			//panelGame == null
@@ -74,6 +79,7 @@ public class Game {
 			panelGame.addKeyListener(new PauseOrContinueListener());
 		} else {
 			//panelGame != null
+			setScore(0);//设置分数为0
 			snake = Snake.getInstance();
 			panelGame = snake.getPanel();
 		}
@@ -85,6 +91,19 @@ public class Game {
 		Game.getInstance().fireGameRuning();//触发游戏运行中
 		Game.run();
 	}
+
+
+	/**
+	 * 设置分数
+	 * @param sc
+	 */
+	public static void setScore(int sc) {
+		Game.score = sc;
+		JLabel label =(JLabel) ComponentUtil.getComponentByName(Constants.NAME_LABEL_SCORE);
+		label.setText(Game.score + "");
+	}
+	
+	
 
 	/**
 	 * 运行游戏
@@ -238,10 +257,10 @@ public class Game {
 	/**
 	 * 触发游戏异常停止事件
 	 */
-	public void fireGameStopErr() {
+	public void fireGameStopErr(String message) {
 		if (listeners == null)
 			return;
-		GameEvent event = new GameEvent(this, GameState.STOP_ERR);
+		GameEvent event = new GameEvent(this, GameState.STOP_ERR, message);
 		notifyListeners(event);
 	}
 	
@@ -254,7 +273,17 @@ public class Game {
 		GameEvent event = new GameEvent(this, GameState.GAME_OVER);
 		notifyListeners(event);
 	}
-
+	
+	/**
+	 * 触发游戏分数改变事件
+	 */
+	public void fireGameScoreChange() {
+		if (listeners == null)
+			return;
+		GameEvent event = new GameEvent(this, GameState.GAME_SCORE_CHANGE);
+		notifyListeners(event);
+	}
+	
 	/**
 	 * 通知所有的GameListener
 	 */
@@ -305,6 +334,16 @@ public class Game {
 		Constants.apple = block;
 		block.draw(ColorEnum.COLOR_APPLE.toColor());
 		Snake.getInstance().getPanel().repaint();
+	}
+
+	/**
+	 * 计分
+	 */
+	public static void calculateScore() {
+		int score = 0;
+		score += Constants.PER_SCORE;
+		setScore(score);
+		Game.getInstance().fireGameScoreChange();
 	}
 
 
