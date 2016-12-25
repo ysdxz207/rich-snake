@@ -4,8 +4,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.puyixiaowo.rsnake.model.Config;
 
 public class TestTable {

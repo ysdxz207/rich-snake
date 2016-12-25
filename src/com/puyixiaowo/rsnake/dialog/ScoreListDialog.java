@@ -7,7 +7,6 @@ import java.awt.Container;
 import java.awt.Frame;
 
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
