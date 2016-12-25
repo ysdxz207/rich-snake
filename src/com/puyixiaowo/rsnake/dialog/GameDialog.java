@@ -14,6 +14,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -21,22 +22,22 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-
-import org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.enums.ImagesPath;
+import com.puyixiaowo.rsnake.enums.Level;
 import com.puyixiaowo.rsnake.model.Config;
 import com.puyixiaowo.rsnake.model.Game;
 import com.puyixiaowo.rsnake.model.Screen;
+import com.puyixiaowo.rsnake.util.ResourceUtil;
 
 /**
  * @author weishaoqiang
  * @date 2016年12月11日 上午10:07:02
  */
-public class MainDialog extends JFrame {
+public class GameDialog extends JFrame {
 
 	/**
 	 * 
@@ -51,7 +52,7 @@ public class MainDialog extends JFrame {
 	/**
 	 * @throws HeadlessException
 	 */
-	public MainDialog() throws HeadlessException {
+	public GameDialog() throws HeadlessException {
 		initUI();
 	}
 
@@ -75,16 +76,13 @@ public class MainDialog extends JFrame {
 		centerFrame(frame);
 		frame.addWindowListener(new WindowAdapter() {
 
-			/* (non-Javadoc)
-			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
-			 */
 			@Override
 			public void windowClosing(WindowEvent e) {
 				super.windowClosing(e);
-				//保存分数
+				// 保存分数
 				Config.saveConf();
 			}
-			
+
 		});
 	}
 
@@ -98,9 +96,9 @@ public class MainDialog extends JFrame {
 		JLabel labelScoreText = new JLabel();
 		labelScoreText.setText("分数：");
 		labelScoreText.setFont(new Font("宋体", Font.BOLD, 22));
-		//分数显示
+		// 分数显示
 		JTextField textScore = new JTextField();
-		
+
 		textScore.setBackground(new Color(248, 243, 224));
 		textScore.setBorder(null);
 		textScore.setEditable(false);
@@ -116,7 +114,7 @@ public class MainDialog extends JFrame {
 		// 工具栏
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
-		//游戏
+		// 游戏
 		JMenu menuNewGame = new JMenu("游戏");
 		JMenuItem itemNewGame = new JMenuItem("新游戏");
 		itemNewGame.addActionListener(new ActionListener() {
@@ -126,10 +124,46 @@ public class MainDialog extends JFrame {
 				newGame();
 			}
 		});
+
+		JMenu menuLevel = new JMenu("选择难度");
+		// 选中样式icon
+		ImageIcon iconSelected = new ImageIcon(ResourceUtil.getImage(ImagesPath.MENU_ITEM_SELECTED.getFileName()));
+		for (Level level : Level.values()) {
+			JMenuItem item = new JMenuItem(level.getDescription());
+			if (level.name().equals("NORMAL")) {
+				item.setIcon(iconSelected);
+			}
+			item.setName(level.name());
+			item.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// 选择难度
+					item.setSelected(true);
+					// 清空其他难度选项选中样式
+					for (int i = 0; i < menuLevel.getItemCount(); i++) {
+						JMenuItem it = menuLevel.getItem(i);
+						it.setIcon(null);
+					}
+					// 设置当前难度选项选中样式
+					item.setIcon(iconSelected);
+
+					for (Level level : Level.values()) {
+						if (level.name().equals(item.getName())) {
+							Game.level = level;
+						}
+					}
+				}
+			});
+			menuLevel.add(item);
+		}
+
 		menuNewGame.add(itemNewGame);
-		//分数
+		menuNewGame.add(menuLevel);
+		// 分数
 		JMenu menuScore = new JMenu("分数");
-		JMenuItem itemScoreHighest = new JMenuItem("最高记录");
+		JMenuItem itemScoreHighest = new JMenuItem("最高分");
+		JMenuItem itemScoreList = new JMenuItem("游戏记录");
 		itemScoreHighest.addActionListener(new ActionListener() {
 
 			@Override
@@ -137,11 +171,21 @@ public class MainDialog extends JFrame {
 				showHighestScore();
 			}
 		});
+		itemScoreList.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new ScoreListDialog(frame).setVisible(true);
+				;
+			}
+		});
 		menuScore.add(itemScoreHighest);
+		menuScore.add(itemScoreList);
+
 		menuBar.add(menuNewGame);
 		menuBar.add(menuScore);
 	}
-	
+
 	/**
 	 * 显示最高分
 	 */
@@ -161,7 +205,6 @@ public class MainDialog extends JFrame {
 		int height = Constants.HEIGHT_PANEL_GAME - subtraction;
 
 		System.out.println("游戏区域：" + width + "x" + height);
-		
 
 		panelGame.setBorder(new EmptyBorder(width / 2, width / 2, width / 2, width / 2));
 		panelGame.setSize(width, height);
@@ -204,19 +247,4 @@ public class MainDialog extends JFrame {
 		}
 	}
 
-	public static void main(String[] args) {
-		try {
-			// 设置此开关量为false即表示关闭之，BeautyEye LNF中默认是true
-			BeautyEyeLNFHelper.translucencyAtFrameInactive = false;
-			// 设置本属性将改变窗口边框样式定义
-			BeautyEyeLNFHelper.frameBorderStyle = BeautyEyeLNFHelper.FrameBorderStyle.translucencyAppleLike;
-			org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();
-			UIManager.put("RootPane.setupButtonVisible", false);//关闭设置按钮
-		} catch (Exception e) {
-
-		}
-
-		new MainDialog();
-
-	}
 }

@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.model.Game;
-import com.puyixiaowo.rsnake.model.Screen;
+import com.puyixiaowo.rsnake.util.DialogUtil;
 
 /**
  * 最高分
@@ -51,17 +51,7 @@ public class HighestScoreDialog extends JDialog {
 		panel.setBackground(ColorEnum.COLOR_BG.toColor());
 		container.add(panel, BorderLayout.PAGE_END);
 		setSize(400, 260);
-		center(400, 260);
-	}
-
-	/**
-	 * 
-	 */
-	private void center(int width, int height) {
-		Screen screen = new Screen();
-		int x = (screen.getWidth() - width) / 2;
-		int y = (screen.getHeight() - height) / 2;
-		setLocation(x, y);
+		DialogUtil.center(this, 400, 260);
 	}
 
 }

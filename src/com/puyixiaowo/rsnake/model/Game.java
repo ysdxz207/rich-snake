@@ -14,9 +14,10 @@ import javax.swing.JTextField;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.puyixiaowo.rsnake.GameState;
 import com.puyixiaowo.rsnake.constants.ColorEnum;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.enums.GameState;
+import com.puyixiaowo.rsnake.enums.Level;
 import com.puyixiaowo.rsnake.event.GameEvent;
 import com.puyixiaowo.rsnake.listener.GameListener;
 import com.puyixiaowo.rsnake.listener.PauseOrContinueListener;
@@ -34,6 +35,7 @@ public class Game {
 	volatile private static Game instance = null;
 
 	public static int score = 0;
+	public static Level  level = Level.NORMAL;//游戏难度默认为普通
 
 	private Collection<GameListener> listeners;
 
@@ -69,7 +71,7 @@ public class Game {
 	 * 
 	 */
 	private Game(JPanel panelGame) {
-		// initSnake(panelGame);
+		
 	}
 
 	/**
@@ -290,6 +292,18 @@ public class Game {
 		GameEvent event = new GameEvent(this, GameState.GAME_SCORE_CHANGE);
 		notifyListeners(event);
 	}
+	/**
+	 * 触发游戏难度改变事件
+	 * @param to 
+	 * @param from 
+	 * 
+	 */
+	public void fireGameLevelChange(Level from, Level to) {
+		if (listeners == null)
+			return;
+		GameEvent event = new GameEvent(this, from, to);
+		notifyListeners(event);
+	}
 
 	/**
 	 * 通知所有的GameListener
@@ -368,7 +382,11 @@ public class Game {
 			}
 			map.put(score.getString("time"), score.getInteger("sc"));
 		}
-		return MapUtil.getMaxValue(map).toString();
+		int score = (int) MapUtil.getMaxValue(map);
+		if (score < 0) {
+			score = 0;
+		}
+		return score + "";
 	}
 
 }

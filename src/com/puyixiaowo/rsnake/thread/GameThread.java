@@ -1,6 +1,5 @@
 package com.puyixiaowo.rsnake.thread;
 
-import com.puyixiaowo.rsnake.constants.Constants;
 import com.puyixiaowo.rsnake.model.Game;
 import com.puyixiaowo.rsnake.model.Snake;
 
@@ -27,7 +26,7 @@ public class GameThread extends Thread {
 						wait();
 					} else {
 						Snake.getInstance().moveOneStep();
-						Thread.sleep(Constants.SNAKE_MOVE_INTERVAL_DEFAULT);
+						Thread.sleep(Game.level.getInterval());
 					}
 				}
 			} catch (Exception e) {

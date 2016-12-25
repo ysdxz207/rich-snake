@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.puyixiaowo.rsnake;
+package com.puyixiaowo.rsnake.enums;
 
 /**
  * @author weishaoqiang

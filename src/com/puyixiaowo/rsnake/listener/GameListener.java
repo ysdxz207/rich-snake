@@ -6,8 +6,8 @@ package com.puyixiaowo.rsnake.listener;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.puyixiaowo.rsnake.GameState;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.enums.GameState;
 import com.puyixiaowo.rsnake.event.GameEvent;
 import com.puyixiaowo.rsnake.util.ComponentUtil;
 
@@ -36,6 +36,7 @@ public class GameListener implements Listener{
 				//游戏分数改变
 				
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

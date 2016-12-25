@@ -7,6 +7,7 @@ import javax.crypto.SecretKey;
 import javax.swing.JPanel;
 
 import com.alibaba.fastjson.JSONObject;
+import com.puyixiaowo.rsnake.enums.Level;
 import com.puyixiaowo.rsnake.model.Block;
 
 /**
@@ -27,10 +28,6 @@ public class Constants {
 	
 	
 	public static final int SNAKE_LENGTH = 3;
-	/**
-	 * 默认蛇移动时间间隔
-	 */
-	public static final long SNAKE_MOVE_INTERVAL_DEFAULT = 100;
 	/**
 	 * 游戏区域名称
 	 */

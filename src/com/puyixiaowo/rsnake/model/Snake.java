@@ -123,12 +123,12 @@ public class Snake {
 			this.nextBodyBlock();
 		}
 		direction = getSnakeRandomDirection();// 获取蛇初始运动方向
-		System.out.println("snake born direction:" + direction);
-		System.out.println("snake born,position:");
-		for (int i = 0; i < body.size(); i++) {
-			Block block = body.get(i);
-			System.out.println("block[" + i + "]x=" + block.getX() + ",y=" + block.getY());
-		}
+		//System.out.println("snake born direction:" + direction);
+		//System.out.println("snake born,position:");
+//		for (int i = 0; i < body.size(); i++) {
+//			Block block = body.get(i);
+//			System.out.println("block[" + i + "]x=" + block.getX() + ",y=" + block.getY());
+//		}
 	}
 
 	/**

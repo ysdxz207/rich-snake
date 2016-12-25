@@ -20,6 +20,7 @@ public class Config {
 
 	// 使用volatile关键字保其可见性
 	volatile private static Config instance = null;
+	private static String rootPath;
 	private static String filePath;
 
 	public String getFilePath() {
@@ -51,7 +52,17 @@ public class Config {
 	 * 
 	 */
 	public Config() {
-		filePath = getConfigDir() + "conf/";
+		rootPath = getConfigDir();
+		filePath = rootPath + "conf/";
+	}
+
+	/**
+	 * 获取图片资源目录
+	 * 
+	 * @return
+	 */
+	public static String getImagesResourcePath() {
+		return Config.rootPath + "images/";
 	}
 
 	/**
@@ -143,6 +154,7 @@ public class Config {
 		JSONObject score = new JSONObject();
 		score.put("time", DateUtil.getNowStr());
 		score.put("sc", sc);
+		score.put("level", Game.level.getDescription());
 
 		if (isUserConfExists(username)) {
 			readUserConf(username).put("score", score);
@@ -153,7 +165,9 @@ public class Config {
 
 			JSONObject userConf = new JSONObject();
 			JSONArray scores = new JSONArray();
-			scores.add(score);
+			if (sc > 0) {
+				scores.add(score);
+			}
 
 			userConf.put("username", username);
 			userConf.put("scores", scores);
@@ -188,7 +202,12 @@ public class Config {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		FileUtil.saveFile(filePath + Constants.CONFIG_FILE_NAME, str);
+		if (new File(filePath + Constants.CONFIG_FILE_NAME).exists()) {
+
+			FileUtil.saveFile(filePath + Constants.CONFIG_FILE_NAME, str);
+		} else {
+			FileUtil.writeFile(str, filePath, Constants.CONFIG_FILE_NAME, Constants.ENCODE);
+		}
 	}
 
 	public static void addScore(int sc) {
@@ -206,6 +225,7 @@ public class Config {
 		JSONObject score = new JSONObject();
 		score.put("sc", sc);
 		score.put("time", DateUtil.getNowStr());
+		score.put("level", Game.level.getDescription());
 		scores.add(score);
 		userConf.put("scores", scores);
 		configs.add(userConf);
@@ -231,6 +251,29 @@ public class Config {
 	public static String getCurrentUsername() {
 		JSONObject conf = readConf();
 		return conf.getString("currentUser");
+	}
+
+	public static String[][] getScoreTableList() {
+		JSONObject userConfig = Config.readUserConf(Config.getCurrentUsername());
+		JSONArray scores = userConfig.getJSONArray("scores");
+		String[][] data = new String[scores.size()][3];
+		for (int i = 0; i < scores.size(); i++) {
+			String[] scoreData = new String[3];
+			Object object = scores.get(i);
+			JSONObject score = null;
+			if (object instanceof JSONObject) {
+				score = (JSONObject) object;
+				int sc = score.getIntValue("sc");
+				scoreData[0] = sc + "";
+				scoreData[1] = score.getString("level");
+				scoreData[2] = score.getString("time");
+				if (sc > 0) {
+					data[scores.size() -1 - i] = scoreData;
+				}
+			}
+		}
+
+		return data;
 	}
 
 }
