@@ -35,7 +35,7 @@ public class Game {
 	volatile private static Game instance = null;
 
 	public static int score = 0;
-	public static Level  level = Level.NORMAL;//游戏难度默认为普通
+	public static Level level;
 
 	private Collection<GameListener> listeners;
 
@@ -78,7 +78,7 @@ public class Game {
 	 * 
 	 */
 	public static void newGame(JPanel panelGame) {
-
+		Game.level = Constants.level;//设置游戏难度
 		Snake snake = null;
 		if (Game.isFirst()) {
 			// panelGame == null
@@ -372,20 +372,21 @@ public class Game {
 	 * @return
 	 */
 	public static String getCurrentUserHighestScore() {
+		int score = 0;
 		Map<String, Integer> map =  new HashMap<String, Integer>();
 		JSONObject userConfig = Config.readUserConf(Config.getCurrentUsername());
 		JSONArray scores = userConfig.getJSONArray("scores");
-		for (Object object : scores) {
-			JSONObject score = null;
-			if (object instanceof JSONObject) {
-				score = (JSONObject) object;
+		if (scores.size() > 0) {
+			for (Object object : scores) {
+				JSONObject scoreObj = null;
+				if (object instanceof JSONObject) {
+					scoreObj = (JSONObject) object;
+				}
+				map.put(scoreObj.getString("time"), scoreObj.getInteger("sc"));
 			}
-			map.put(score.getString("time"), score.getInteger("sc"));
+			score = (int) MapUtil.getMaxValue(map);
 		}
-		int score = (int) MapUtil.getMaxValue(map);
-		if (score < 0) {
-			score = 0;
-		}
+		
 		return score + "";
 	}
 

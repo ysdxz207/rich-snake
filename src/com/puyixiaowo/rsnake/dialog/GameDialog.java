@@ -150,7 +150,7 @@ public class GameDialog extends JFrame {
 
 					for (Level level : Level.values()) {
 						if (level.name().equals(item.getName())) {
-							Game.level = level;
+							Constants.level = level;
 						}
 					}
 				}

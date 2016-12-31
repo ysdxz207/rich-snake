@@ -3,7 +3,6 @@
  */
 package com.puyixiaowo.rsnake.constants;
 
-import javax.crypto.SecretKey;
 import javax.swing.JPanel;
 
 import com.alibaba.fastjson.JSONObject;
@@ -77,4 +76,8 @@ public class Constants {
 	 * des加密key，需要是8位
 	 */
 	public static String DES_KEY = "hupubao0";
+	/**
+	 * 游戏难度，默认普通
+	 */
+	public static Level level = Level.NORMAL;
 }

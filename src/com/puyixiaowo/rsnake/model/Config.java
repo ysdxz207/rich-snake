@@ -8,6 +8,7 @@ import java.io.File;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.puyixiaowo.rsnake.constants.Constants;
+import com.puyixiaowo.rsnake.enums.Level;
 import com.puyixiaowo.rsnake.util.DateUtil;
 import com.puyixiaowo.rsnake.util.EncryptUtils;
 import com.puyixiaowo.rsnake.util.FileUtil;
@@ -21,10 +22,11 @@ public class Config {
 	// 使用volatile关键字保其可见性
 	volatile private static Config instance = null;
 	private static String rootPath;
-	private static String filePath;
+	private static String rootconfigPath;
+	private static String configFilePath;
 
-	public String getFilePath() {
-		return filePath;
+	public String getConfigFilePath() {
+		return configFilePath;
 	}
 
 	public static Config getInstance() {
@@ -53,7 +55,18 @@ public class Config {
 	 */
 	public Config() {
 		rootPath = getConfigDir();
-		filePath = rootPath + "conf/";
+		rootconfigPath = getRootConfigPaht();
+		configFilePath = rootconfigPath + "conf/";
+	}
+
+	/**
+	 * 获取配置文件根路径
+	 * 
+	 * @return
+	 */
+	private String getRootConfigPaht() {
+
+		return System.getProperty("user.dir") + "/";
 	}
 
 	/**
@@ -96,7 +109,7 @@ public class Config {
 		if (Constants.CONFIG != null) {
 			return Constants.CONFIG;
 		}
-		StringBuffer buffer = FileUtil.readToBuffer(filePath + Constants.CONFIG_FILE_NAME, Constants.ENCODE);
+		StringBuffer buffer = FileUtil.readToBuffer(configFilePath + Constants.CONFIG_FILE_NAME, Constants.ENCODE);
 		if (buffer == null) {
 			return null;
 		}
@@ -151,20 +164,23 @@ public class Config {
 	 *            分数
 	 */
 	public static void addUserConf(String username, int sc) {
+		Level level = Game.level == null ? Constants.level : Game.level;
+		JSONObject config = new JSONObject();
+
 		JSONObject score = new JSONObject();
 		score.put("time", DateUtil.getNowStr());
 		score.put("sc", sc);
-		score.put("level", Game.level.getDescription());
+		score.put("level", level.getDescription());
 
 		if (isUserConfExists(username)) {
 			readUserConf(username).put("score", score);
 		} else {
 			// 创建新的用户配置
-			JSONObject config = new JSONObject();
 			JSONArray configs = new JSONArray();
 
 			JSONObject userConf = new JSONObject();
 			JSONArray scores = new JSONArray();
+			
 			if (sc > 0) {
 				scores.add(score);
 			}
@@ -178,7 +194,6 @@ public class Config {
 
 			Constants.CONFIG = config;
 		}
-
 	}
 
 	/**
@@ -196,17 +211,17 @@ public class Config {
 	 * 保存配置到文件
 	 */
 	public static void saveConf() {
-		String str = null;
+		String str = "";
 		try {
 			str = EncryptUtils.encryptToDES(Constants.DES_KEY, Constants.CONFIG.toJSONString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (new File(filePath + Constants.CONFIG_FILE_NAME).exists()) {
+		if (new File(configFilePath + Constants.CONFIG_FILE_NAME).exists()) {
 
-			FileUtil.saveFile(filePath + Constants.CONFIG_FILE_NAME, str);
+			FileUtil.saveFile(configFilePath + Constants.CONFIG_FILE_NAME, str);
 		} else {
-			FileUtil.writeFile(str, filePath, Constants.CONFIG_FILE_NAME, Constants.ENCODE);
+			FileUtil.writeFile(str, configFilePath, Constants.CONFIG_FILE_NAME, Constants.ENCODE);
 		}
 	}
 
@@ -240,7 +255,7 @@ public class Config {
 	 * @return
 	 */
 	private static boolean isConfExists() {
-		return new File(filePath + Constants.CONFIG_FILE_NAME).exists();
+		return new File(configFilePath + Constants.CONFIG_FILE_NAME).exists();
 	}
 
 	/**
@@ -268,7 +283,7 @@ public class Config {
 				scoreData[1] = score.getString("level");
 				scoreData[2] = score.getString("time");
 				if (sc > 0) {
-					data[scores.size() -1 - i] = scoreData;
+					data[scores.size() - 1 - i] = scoreData;
 				}
 			}
 		}
