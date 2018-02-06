@@ -117,13 +117,7 @@ public class GameDialog extends JFrame {
 		// 游戏
 		JMenu menuNewGame = new JMenu("游戏");
 		JMenuItem itemNewGame = new JMenuItem("新游戏");
-		itemNewGame.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				newGame();
-			}
-		});
+		itemNewGame.addActionListener(e -> newGame());
 
 		JMenu menuLevel = new JMenu("选择难度");
 		// 选中样式icon
@@ -134,27 +128,23 @@ public class GameDialog extends JFrame {
 				item.setIcon(iconSelected);
 			}
 			item.setName(level.name());
-			item.addActionListener(new ActionListener() {
+			item.addActionListener(e -> {
+                // 选择难度
+                item.setSelected(true);
+                // 清空其他难度选项选中样式
+                for (int i = 0; i < menuLevel.getItemCount(); i++) {
+                    JMenuItem it = menuLevel.getItem(i);
+                    it.setIcon(null);
+                }
+                // 设置当前难度选项选中样式
+                item.setIcon(iconSelected);
 
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// 选择难度
-					item.setSelected(true);
-					// 清空其他难度选项选中样式
-					for (int i = 0; i < menuLevel.getItemCount(); i++) {
-						JMenuItem it = menuLevel.getItem(i);
-						it.setIcon(null);
-					}
-					// 设置当前难度选项选中样式
-					item.setIcon(iconSelected);
-
-					for (Level level : Level.values()) {
-						if (level.name().equals(item.getName())) {
-							Constants.level = level;
-						}
-					}
-				}
-			});
+                for (Level level1 : Level.values()) {
+                    if (level1.name().equals(item.getName())) {
+                        Constants.level = level1;
+                    }
+                }
+            });
 			menuLevel.add(item);
 		}
 
@@ -164,21 +154,10 @@ public class GameDialog extends JFrame {
 		JMenu menuScore = new JMenu("分数");
 		JMenuItem itemScoreHighest = new JMenuItem("最高分");
 		JMenuItem itemScoreList = new JMenuItem("游戏记录");
-		itemScoreHighest.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				showHighestScore();
-			}
-		});
-		itemScoreList.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new ScoreListDialog(frame).setVisible(true);
-				;
-			}
-		});
+		itemScoreHighest.addActionListener(e -> showHighestScore());
+		itemScoreList.addActionListener(e -> {
+            new ScoreListDialog(frame).setVisible(true);
+        });
 		menuScore.add(itemScoreHighest);
 		menuScore.add(itemScoreList);
 
@@ -245,6 +224,9 @@ public class GameDialog extends JFrame {
 		} else {
 			Game.reStartGame();
 		}
+
+		//新游戏暂停
+		Game.pauseOrContinueGame();
 	}
 
 }
